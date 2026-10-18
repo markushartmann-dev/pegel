@@ -1,0 +1,193 @@
+@import "tailwindcss";
+
+/*
+ * Design-Tokens
+ * ─────────────
+ * Jedes Farbschema definiert eine helle (--l-*) und eine dunkle (--d-*) Variante.
+ * data-mode auf <html> wählt die Variante: light | dark | system (folgt dem Betriebssystem).
+ * Komponenten verwenden ausschließlich die semantischen Variablen (--bg, --fg, --primary …).
+ */
+
+:root {
+  --radius: 0.875rem;
+  --radius-sm: 0.5rem;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.06), 0 8px 24px -12px rgb(0 0 0 / 0.18);
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Midnight – dunkles Anthrazit mit Cyan */
+[data-scheme="midnight"] {
+  --l-bg: #f5f7f9; --l-card: #ffffff; --l-muted: #eceff3; --l-fg: #0f1720; --l-fg-muted: #5b6673;
+  --l-border: #dde2e8; --l-primary: #0e7490; --l-primary-fg: #ffffff; --l-accent: #0891b2; --l-ring: #06b6d4;
+  --l-chart-1: #0e7490; --l-chart-2: #7c3aed; --l-chart-3: #d97706; --l-chart-4: #059669; --l-chart-5: #db2777;
+  --d-bg: #0d1014; --d-card: #151a20; --d-muted: #1d242c; --d-fg: #e6edf3; --d-fg-muted: #93a1b0;
+  --d-border: #26303a; --d-primary: #22d3ee; --d-primary-fg: #04222a; --d-accent: #67e8f9; --d-ring: #22d3ee;
+  --d-chart-1: #22d3ee; --d-chart-2: #a78bfa; --d-chart-3: #fbbf24; --d-chart-4: #34d399; --d-chart-5: #f472b6;
+}
+
+/* Ocean – Blau- und Türkistöne */
+[data-scheme="ocean"] {
+  --l-bg: #f0f6fa; --l-card: #ffffff; --l-muted: #e1edf5; --l-fg: #0b2135; --l-fg-muted: #4d6478;
+  --l-border: #cfe0ec; --l-primary: #0369a1; --l-primary-fg: #ffffff; --l-accent: #0d9488; --l-ring: #0ea5e9;
+  --l-chart-1: #0369a1; --l-chart-2: #0d9488; --l-chart-3: #6366f1; --l-chart-4: #f59e0b; --l-chart-5: #e11d48;
+  --d-bg: #08131f; --d-card: #0e1f31; --d-muted: #142a41; --d-fg: #e2f0fb; --d-fg-muted: #8fb0c9;
+  --d-border: #1d3550; --d-primary: #38bdf8; --d-primary-fg: #04192a; --d-accent: #2dd4bf; --d-ring: #38bdf8;
+  --d-chart-1: #38bdf8; --d-chart-2: #2dd4bf; --d-chart-3: #818cf8; --d-chart-4: #fbbf24; --d-chart-5: #fb7185;
+}
+
+/* Forest – dunkles Grün mit hellen Akzenten */
+[data-scheme="forest"] {
+  --l-bg: #f3f7f3; --l-card: #ffffff; --l-muted: #e4ede5; --l-fg: #102116; --l-fg-muted: #4f6455;
+  --l-border: #d3e1d5; --l-primary: #15803d; --l-primary-fg: #ffffff; --l-accent: #4d7c0f; --l-ring: #22c55e;
+  --l-chart-1: #15803d; --l-chart-2: #ca8a04; --l-chart-3: #0e7490; --l-chart-4: #9333ea; --l-chart-5: #dc2626;
+  --d-bg: #0b130e; --d-card: #121e16; --d-muted: #1a2a20; --d-fg: #e5f2e8; --d-fg-muted: #93ad9a;
+  --d-border: #22362a; --d-primary: #4ade80; --d-primary-fg: #052e14; --d-accent: #bef264; --d-ring: #4ade80;
+  --d-chart-1: #4ade80; --d-chart-2: #facc15; --d-chart-3: #22d3ee; --d-chart-4: #c084fc; --d-chart-5: #f87171;
+}
+
+/* Sunset – warme Orange- und Violetttöne */
+[data-scheme="sunset"] {
+  --l-bg: #fdf6f1; --l-card: #ffffff; --l-muted: #f7e9df; --l-fg: #2a1220; --l-fg-muted: #745566;
+  --l-border: #efdacd; --l-primary: #c2410c; --l-primary-fg: #ffffff; --l-accent: #7e22ce; --l-ring: #f97316;
+  --l-chart-1: #c2410c; --l-chart-2: #7e22ce; --l-chart-3: #db2777; --l-chart-4: #ca8a04; --l-chart-5: #0e7490;
+  --d-bg: #160c1a; --d-card: #211327; --d-muted: #2c1a34; --d-fg: #f8e9f0; --d-fg-muted: #bfa0b4;
+  --d-border: #3a2443; --d-primary: #fb923c; --d-primary-fg: #2a0f02; --d-accent: #c084fc; --d-ring: #fb923c;
+  --d-chart-1: #fb923c; --d-chart-2: #c084fc; --d-chart-3: #f472b6; --d-chart-4: #fde047; --d-chart-5: #67e8f9;
+}
+
+/* Light – helles, neutrales Design (dunkle Variante: neutrales Grau) */
+[data-scheme="light"] {
+  --l-bg: #fafafa; --l-card: #ffffff; --l-muted: #f1f1f2; --l-fg: #18181b; --l-fg-muted: #63636b;
+  --l-border: #e4e4e7; --l-primary: #4338ca; --l-primary-fg: #ffffff; --l-accent: #0f766e; --l-ring: #6366f1;
+  --l-chart-1: #4338ca; --l-chart-2: #0f766e; --l-chart-3: #c2410c; --l-chart-4: #a21caf; --l-chart-5: #0369a1;
+  --d-bg: #111113; --d-card: #19191c; --d-muted: #222226; --d-fg: #ececef; --d-fg-muted: #a0a0a8;
+  --d-border: #2e2e33; --d-primary: #a5b4fc; --d-primary-fg: #15153a; --d-accent: #5eead4; --d-ring: #a5b4fc;
+  --d-chart-1: #a5b4fc; --d-chart-2: #5eead4; --d-chart-3: #fdba74; --d-chart-4: #f0abfc; --d-chart-5: #7dd3fc;
+}
+
+/* Gemeinsame Statusfarben */
+[data-scheme] {
+  --l-danger: #b91c1c; --l-warning: #b45309; --l-success: #047857;
+  --d-danger: #f87171; --d-warning: #fbbf24; --d-success: #34d399;
+}
+
+[data-mode="light"],
+[data-mode="system"] {
+  color-scheme: light;
+  --bg: var(--l-bg); --card: var(--l-card); --muted: var(--l-muted); --fg: var(--l-fg); --fg-muted: var(--l-fg-muted);
+  --border: var(--l-border); --primary: var(--l-primary); --primary-fg: var(--l-primary-fg); --accent: var(--l-accent);
+  --ring: var(--l-ring); --danger: var(--l-danger); --warning: var(--l-warning); --success: var(--l-success);
+  --chart-1: var(--l-chart-1); --chart-2: var(--l-chart-2); --chart-3: var(--l-chart-3); --chart-4: var(--l-chart-4); --chart-5: var(--l-chart-5);
+}
+
+[data-mode="dark"] {
+  color-scheme: dark;
+  --bg: var(--d-bg); --card: var(--d-card); --muted: var(--d-muted); --fg: var(--d-fg); --fg-muted: var(--d-fg-muted);
+  --border: var(--d-border); --primary: var(--d-primary); --primary-fg: var(--d-primary-fg); --accent: var(--d-accent);
+  --ring: var(--d-ring); --danger: var(--d-danger); --warning: var(--d-warning); --success: var(--d-success);
+  --chart-1: var(--d-chart-1); --chart-2: var(--d-chart-2); --chart-3: var(--d-chart-3); --chart-4: var(--d-chart-4); --chart-5: var(--d-chart-5);
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-mode="system"] {
+    color-scheme: dark;
+    --bg: var(--d-bg); --card: var(--d-card); --muted: var(--d-muted); --fg: var(--d-fg); --fg-muted: var(--d-fg-muted);
+    --border: var(--d-border); --primary: var(--d-primary); --primary-fg: var(--d-primary-fg); --accent: var(--d-accent);
+    --ring: var(--d-ring); --danger: var(--d-danger); --warning: var(--d-warning); --success: var(--d-success);
+    --chart-1: var(--d-chart-1); --chart-2: var(--d-chart-2); --chart-3: var(--d-chart-3); --chart-4: var(--d-chart-4); --chart-5: var(--d-chart-5);
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-card: var(--card);
+  --color-muted: var(--muted);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-fg: var(--primary-fg);
+  --color-accent: var(--accent);
+  --color-ring: var(--ring);
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+  --color-success: var(--success);
+  --font-sans: var(--font-sans);
+  --radius-card: var(--radius);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv11", "ss01";
+  }
+  *,
+  ::before,
+  ::after {
+    border-color: var(--border);
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: color-mix(in oklab, var(--primary) 30%, transparent);
+  }
+  input,
+  select,
+  textarea {
+    font-size: 16px; /* verhindert Zoom auf iOS */
+  }
+  @media (min-width: 640px) {
+    input,
+    select,
+    textarea {
+      font-size: 0.9375rem;
+    }
+  }
+}
+
+@utility card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Recharts an Tokens anpassen */
+.recharts-cartesian-grid line {
+  stroke: var(--border);
+}
+.recharts-text {
+  fill: var(--fg-muted);
+  font-size: 12px;
+}
+.recharts-default-tooltip {
+  background: var(--card) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-sm);
+  color: var(--fg);
+}
+
+dialog::backdrop {
+  background: rgb(0 0 0 / 0.5);
+  backdrop-filter: blur(2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

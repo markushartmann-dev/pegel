@@ -1,0 +1,21 @@
+# Pegel – nur für lokale Entwicklung: PostgreSQL auf localhost:5432
+#   docker compose -f compose.dev.yaml up -d
+#   DATABASE_URL=postgresql://pegel:pegel@localhost:5432/pegel  (in .env)
+#   npm run db:migrate && npm run db:seed && npm run dev
+# Ohne Docker geht es auch: npm run db:dev (eingebettete PostgreSQL auf Port 54329)
+name: pegel-dev
+
+services:
+  db:
+    image: postgres:17.11-alpine3.24
+    environment:
+      POSTGRES_USER: pegel
+      POSTGRES_PASSWORD: pegel
+      POSTGRES_DB: pegel
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pegel-dev-db:/var/lib/postgresql/data
+
+volumes:
+  pegel-dev-db: {}

@@ -1,0 +1,355 @@
+// Pegel – Datenmodell
+// Alle Zeitstempel werden als timestamptz (UTC) gespeichert und erst in der Oberfläche
+// in die Zeitzone des Benutzers umgerechnet.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum AccountStatus {
+  ACTIVE
+  DEACTIVATED
+}
+
+enum ThemeMode {
+  SYSTEM
+  LIGHT
+  DARK
+}
+
+enum ColorScheme {
+  MIDNIGHT
+  OCEAN
+  FOREST
+  SUNSET
+  LIGHT
+}
+
+/// Für die Schätzung verwendetes Verteilungsmodell (nicht identisch mit dem Geschlecht).
+enum DistributionModel {
+  WIDMARK_MALE
+  WIDMARK_FEMALE
+  SEIDL_MALE
+  SEIDL_FEMALE
+  CUSTOM
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  DIVERSE
+  UNSPECIFIED
+}
+
+enum CommunityDisplay {
+  PSEUDONYM
+  DISPLAY_NAME
+}
+
+enum BeverageCategory {
+  BEER
+  WINE
+  SPARKLING
+  SPIRITS
+  MIXED
+  CIDER
+  OTHER
+}
+
+enum AuditSeverity {
+  INFO
+  WARNING
+  SECURITY
+  ERROR
+}
+
+enum ConsentType {
+  PRIVACY_NOTICE
+  HEALTH_DATA_PROCESSING
+  COMMUNITY_RANKING
+  PUSH_NOTIFICATIONS
+}
+
+/// Benutzerkonto. Felder id, name, email, emailVerified, image, createdAt, updatedAt
+/// werden von Better Auth erwartet.
+model User {
+  id            String        @id
+  name          String
+  email         String        @unique
+  emailVerified Boolean       @default(false)
+  image         String?
+  createdAt     DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime      @updatedAt @db.Timestamptz(3)
+  role          Role          @default(USER)
+  status        AccountStatus @default(ACTIVE)
+
+  lastLoginAt     DateTime? @db.Timestamptz(3)
+  lastActiveAt    DateTime? @db.Timestamptz(3)
+  lastLogoutAt    DateTime? @db.Timestamptz(3)
+  profileUpdatedAt DateTime? @db.Timestamptz(3)
+
+  timezone            String      @default("Europe/Berlin")
+  onboardingCompleted Boolean     @default(false)
+  themeMode           ThemeMode   @default(SYSTEM)
+  colorScheme         ColorScheme @default(MIDNIGHT)
+
+  notificationsEnabled Boolean @default(false)
+  reminderEnabled      Boolean @default(false)
+  /// Lokale Uhrzeit "HH:mm" in der Zeitzone des Benutzers
+  reminderTime         String  @default("21:00")
+  weeklySummaryEnabled Boolean @default(false)
+
+  communityOptIn     Boolean          @default(true)
+  communityDisplay   CommunityDisplay @default(DISPLAY_NAME)
+  communityPseudonym String?
+
+  sessions          Session[]
+  accounts          Account[]
+  profile           UserProfile?
+  profileRevisions  UserProfileRevision[]
+  beverages         Beverage[]
+  entries           ConsumptionEntry[]
+  pushSubscriptions PushSubscription[]
+  notifications     UserNotification[]
+  consents          UserConsent[]
+  auditLogs         AuditLog[]           @relation("AuditActor")
+  auditTargets      AuditLog[]           @relation("AuditTarget")
+
+  @@index([role])
+  @@index([status])
+  @@index([communityOptIn])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime @db.Timestamptz(3)
+  token     String   @unique
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime? @db.Timestamptz(3)
+  refreshTokenExpiresAt DateTime? @db.Timestamptz(3)
+  scope                 String?
+  /// Passwort-Hash (scrypt, von Better Auth erzeugt). Niemals Klartext.
+  password              String?
+  createdAt             DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt             DateTime  @updatedAt @db.Timestamptz(3)
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime @db.Timestamptz(3)
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt  DateTime @updatedAt @db.Timestamptz(3)
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+/// Zähler für das Rate-Limiting von Better Auth (Login, Registrierung, Passwort-Reset).
+model RateLimit {
+  id          String @id
+  key         String @unique
+  count       Int
+  lastRequest BigInt
+
+  @@map("rateLimit")
+}
+
+/// Aktuelles Berechnungsprofil. Jede Änderung erzeugt zusätzlich eine UserProfileRevision.
+model UserProfile {
+  userId            String            @id
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gender            Gender            @default(UNSPECIFIED)
+  distributionModel DistributionModel
+  /// Nur bei distributionModel = CUSTOM
+  customFactor      Decimal?          @db.Decimal(4, 3)
+  weightKg          Decimal           @db.Decimal(5, 1)
+  heightCm          Int
+  updatedAt         DateTime          @updatedAt @db.Timestamptz(3)
+
+  @@map("user_profile")
+}
+
+/// Unveränderliche Historie der Profilparameter, damit historische Schätzungen nachvollziehbar bleiben.
+model UserProfileRevision {
+  id                String            @id @default(cuid())
+  userId            String
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  distributionModel DistributionModel
+  customFactor      Decimal?          @db.Decimal(4, 3)
+  weightKg          Decimal           @db.Decimal(5, 1)
+  heightCm          Int
+  validFrom         DateTime          @default(now()) @db.Timestamptz(3)
+
+  @@index([userId, validFrom])
+  @@map("user_profile_revision")
+}
+
+model Beverage {
+  id            String           @id @default(cuid())
+  name          String
+  description   String?
+  volumeMl      Int
+  /// Alkoholgehalt in % vol (z. B. 5.0)
+  abv           Decimal          @db.Decimal(4, 1)
+  /// Reiner Alkohol in Gramm: volumeMl × abv/100 × 0,789
+  alcoholGrams  Decimal          @db.Decimal(7, 2)
+  category      BeverageCategory @default(OTHER)
+  icon          String?
+  /// null = globales Standardgetränk
+  ownerId       String?
+  owner         User?            @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  isDefault     Boolean          @default(false)
+  isActive      Boolean          @default(true)
+  isFavorite    Boolean          @default(false)
+  sortOrder     Int              @default(0)
+  createdAt     DateTime         @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime         @updatedAt @db.Timestamptz(3)
+  entries       ConsumptionEntry[]
+
+  @@unique([ownerId, name])
+  @@index([ownerId, isActive])
+  @@index([isDefault, isActive])
+  @@map("beverage")
+}
+
+/// Konsumeintrag mit unveränderlichem Snapshot der Getränkedaten zum Erfassungszeitpunkt.
+model ConsumptionEntry {
+  id              String           @id @default(cuid())
+  userId          String
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  beverageId      String?
+  beverage        Beverage?        @relation(fields: [beverageId], references: [id], onDelete: SetNull)
+  beverageName    String
+  category        BeverageCategory @default(OTHER)
+  /// Alkoholgehalt in % vol (Snapshot)
+  abv             Decimal          @db.Decimal(4, 1)
+  /// Volumen einer Portion in ml (Snapshot, ggf. individuell angepasst)
+  volumeMl        Int
+  servings        Int              @default(1)
+  /// Reiner Alkohol in Gramm für alle Portionen zusammen
+  alcoholGrams    Decimal          @db.Decimal(7, 2)
+  consumedAt      DateTime         @db.Timestamptz(3)
+  /// Zeitzone, in der der Zeitpunkt eingegeben wurde (IANA)
+  timezone        String
+  note            String?
+  /// Schutz gegen doppelt abgeschickte Formulare (pro Benutzer eindeutig)
+  clientRequestId String?
+  createdAt       DateTime         @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime         @updatedAt @db.Timestamptz(3)
+
+  @@unique([userId, clientRequestId])
+  @@index([userId, consumedAt])
+  @@index([beverageId])
+  @@index([consumedAt])
+  @@map("consumption_entry")
+}
+
+model PushSubscription {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint    String    @unique
+  p256dh      String
+  auth        String
+  userAgent   String?
+  createdAt   DateTime  @default(now()) @db.Timestamptz(3)
+  lastUsedAt  DateTime? @db.Timestamptz(3)
+  failureCount Int      @default(0)
+
+  @@index([userId])
+  @@map("push_subscription")
+}
+
+/// Versendete Benachrichtigungen (auch zur Vermeidung von Doppelversand).
+model UserNotification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  /// Eindeutiger Schlüssel, z. B. "reminder:2026-10-18"
+  dedupeKey String
+  title     String
+  body      String
+  delivered Int      @default(0)
+  failed    Int      @default(0)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  @@unique([userId, dedupeKey])
+  @@index([userId, createdAt])
+  @@map("user_notification")
+}
+
+model UserConsent {
+  id        String      @id @default(cuid())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      ConsentType
+  granted   Boolean
+  /// Version des zugrunde liegenden Hinweistextes
+  version   String
+  createdAt DateTime    @default(now()) @db.Timestamptz(3)
+
+  @@index([userId, type, createdAt])
+  @@map("user_consent")
+}
+
+/// Aktivitäts- und Sicherheitsprotokoll. Enthält keine Passwörter, Tokens oder Konsumdetails.
+/// Bei Kontolöschung bleiben Einträge pseudonymisiert erhalten (actorId/targetUserId = NULL).
+model AuditLog {
+  id           String        @id @default(cuid())
+  createdAt    DateTime      @default(now()) @db.Timestamptz(3)
+  action       String
+  severity     AuditSeverity @default(INFO)
+  actorId      String?
+  actor        User?         @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+  targetUserId String?
+  targetUser   User?         @relation("AuditTarget", fields: [targetUserId], references: [id], onDelete: SetNull)
+  entityType   String?
+  entityId     String?
+  /// Gekürzte IP-Adresse (letztes Oktett entfernt)
+  ipAddress    String?
+  userAgent    String?
+  metadata     Json?
+
+  @@index([createdAt])
+  @@index([actorId, createdAt])
+  @@index([targetUserId, createdAt])
+  @@index([action, createdAt])
+  @@index([severity, createdAt])
+  @@map("audit_log")
+}

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#11161c"/>
+      <stop offset="1" stop-color="#0a0d11"/>
+    </linearGradient>
+    <linearGradient id="liquid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#67e8f9"/>
+      <stop offset="1" stop-color="#0891b2"/>
+    </linearGradient>
+    <clipPath id="glass">
+      <path d="M150 112h212l-26 282a28 28 0 0 1-28 25H204a28 28 0 0 1-28-25z"/>
+    </clipPath>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <g clip-path="url(#glass)">
+    <path d="M120 262c34-18 68-18 102 0s68 18 102 0 68-18 102 0V440H120z" fill="url(#liquid)"/>
+    <circle cx="232" cy="330" r="9" fill="#cffafe" opacity=".7"/>
+    <circle cx="282" cy="372" r="6" fill="#cffafe" opacity=".6"/>
+    <circle cx="262" cy="298" r="5" fill="#cffafe" opacity=".5"/>
+  </g>
+  <path d="M150 112h212l-26 282a28 28 0 0 1-28 25H204a28 28 0 0 1-28-25z" fill="none" stroke="#e6edf3" stroke-width="18" stroke-linejoin="round"/>
+</svg>
