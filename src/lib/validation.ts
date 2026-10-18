@@ -166,6 +166,22 @@ export const adminUserUpdateSchema = z.object({
   role: z.enum(["USER", "ADMIN"]).optional(),
 });
 
+/** Benutzer durch die Administration anlegen: Einladungslink (Standard) oder Startpasswort. */
+export const adminUserCreateSchema = z
+  .object({
+    name: trimmed(50).min(2, "Anzeigename muss mindestens 2 Zeichen lang sein."),
+    email: z.string().trim().toLowerCase().email("Bitte eine gültige E-Mail-Adresse angeben.").max(254),
+    role: z.enum(["USER", "ADMIN"]).default("USER"),
+    mode: z.enum(["link", "password"]).default("link"),
+    password: z.string().optional(),
+  })
+  .superRefine((v, ctx) => {
+    if (v.mode === "password") {
+      const r = passwordSchema.safeParse(v.password ?? "");
+      if (!r.success) ctx.addIssue({ code: "custom", path: ["password"], message: r.error.issues[0].message });
+    }
+  });
+
 export const auditQuerySchema = z.object({
   q: trimmed(100).optional(),
   severity: z.enum(["INFO", "WARNING", "SECURITY", "ERROR"]).optional(),

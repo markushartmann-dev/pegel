@@ -39,6 +39,7 @@ export type AuditAction =
   | "admin.user_role_changed"
   | "admin.sessions_revoked"
   | "admin.user_deleted"
+  | "admin.user_created"
   | "admin.reset_link_created"
   | "admin.default_beverage_changed"
   | "security.csrf_blocked"

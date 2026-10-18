@@ -1,13 +1,14 @@
 import "server-only";
-import { randomBytes } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
+import { hashPassword } from "better-auth/crypto";
 import { prisma } from "../db";
 import { audit } from "../audit";
 import { auth } from "../auth";
 import { env } from "../env";
-import { badRequest, notFound } from "../errors";
+import { badRequest, conflict, notFound } from "../errors";
 import type { CurrentUser } from "../current-user";
 import { checkAdminChange, checkAdminDelete } from "@/lib/permissions";
-import { adminUserQuerySchema, adminUserUpdateSchema, auditQuerySchema } from "@/lib/validation";
+import { adminUserCreateSchema, adminUserQuerySchema, adminUserUpdateSchema, auditQuerySchema } from "@/lib/validation";
 import type { Prisma } from "@/generated/prisma/client";
 
 export async function listUsers(raw: unknown) {
@@ -138,19 +139,73 @@ export async function deleteUser(actor: CurrentUser, id: string, headers?: Heade
  * Einmal-Link zum Zurücksetzen des Passworts (für Installationen ohne SMTP).
  * Der Link wird nur dem Administrator einmalig angezeigt und nicht protokolliert.
  */
-export async function createResetLink(actor: CurrentUser, id: string, headers?: Headers) {
-  const target = await prisma.user.findUnique({ where: { id }, select: { id: true, status: true } });
-  if (!target) throw notFound("Benutzer nicht gefunden.");
-  if (target.status !== "ACTIVE") throw badRequest("Das Konto ist deaktiviert.");
+/** Einmal-Token im Format von Better Auth ("reset-password:<token>") anlegen. */
+async function issuePasswordToken(userId: string, minutes: number) {
   const ctx = await auth.$context;
   const token = randomBytes(24).toString("base64url");
   await ctx.internalAdapter.createVerificationValue({
     identifier: `reset-password:${token}`,
-    value: id,
-    expiresAt: new Date(Date.now() + 60 * 60_000),
+    value: userId,
+    expiresAt: new Date(Date.now() + minutes * 60_000),
   });
+  return `${env.appUrl}/passwort-zuruecksetzen?token=${token}`;
+}
+
+export async function createResetLink(actor: CurrentUser, id: string, headers?: Headers) {
+  const target = await prisma.user.findUnique({ where: { id }, select: { id: true, status: true } });
+  if (!target) throw notFound("Benutzer nicht gefunden.");
+  if (target.status !== "ACTIVE") throw badRequest("Das Konto ist deaktiviert.");
+  const url = await issuePasswordToken(id, 60);
   await audit({ action: "admin.reset_link_created", severity: "SECURITY", actorId: actor.id, targetUserId: id, headers });
-  return { url: `${env.appUrl}/passwort-zuruecksetzen?token=${token}`, expiresInMinutes: 60 };
+  return { url, expiresInMinutes: 60 };
+}
+
+const INVITE_VALID_MINUTES = 7 * 24 * 60;
+
+/**
+ * Benutzer durch die Administration anlegen – funktioniert auch bei geschlossener Registrierung.
+ *  - mode "link":     zufälliges, unbekanntes Passwort + Einladungslink (7 Tage), mit dem die Person
+ *                     ihr eigenes Passwort festlegt. Die Administration kennt das Passwort nie.
+ *  - mode "password": Startpasswort wird von der Administration vergeben.
+ * Die E-Mail-Adresse gilt als bestätigt. Beim ersten Login folgt das normale Onboarding.
+ */
+export async function createUser(actor: CurrentUser, raw: unknown, headers?: Headers) {
+  const input = adminUserCreateSchema.parse(raw);
+  if (await prisma.user.findUnique({ where: { email: input.email }, select: { id: true } })) {
+    throw conflict("Mit dieser E-Mail-Adresse besteht bereits ein Konto.");
+  }
+  const password = input.mode === "password" ? input.password! : randomBytes(32).toString("base64url");
+  const hash = await hashPassword(password);
+  const id = randomUUID().replace(/-/g, "");
+  const now = new Date();
+  try {
+    await prisma.$transaction(async (tx) => {
+      await tx.user.create({
+        data: {
+          id,
+          name: input.name,
+          email: input.email,
+          emailVerified: true,
+          role: input.role,
+          timezone: env.defaultTimezone,
+          createdAt: now,
+          updatedAt: now,
+        },
+      });
+      await tx.account.create({
+        data: { id: randomUUID().replace(/-/g, ""), accountId: id, providerId: "credential", userId: id, password: hash, createdAt: now, updatedAt: now },
+      });
+      await audit(
+        { action: "admin.user_created", severity: "SECURITY", actorId: actor.id, targetUserId: id, headers, metadata: { role: input.role, mode: input.mode } },
+        tx,
+      );
+    });
+  } catch (e) {
+    if ((e as { code?: string }).code === "P2002") throw conflict("Mit dieser E-Mail-Adresse besteht bereits ein Konto.");
+    throw e;
+  }
+  const setupUrl = input.mode === "link" ? await issuePasswordToken(id, INVITE_VALID_MINUTES) : null;
+  return { user: { id, name: input.name, email: input.email, role: input.role }, setupUrl, setupValidDays: setupUrl ? 7 : null };
 }
 
 export async function auditLogPage(raw: unknown) {

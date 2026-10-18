@@ -9,6 +9,7 @@ test.describe.configure({ mode: "serial" });
 
 const admin = { name: "Ada Admin", email: uniqueEmail("admin") };
 const anna = { name: "Anna", email: uniqueEmail("anna") };
+const carla = uniqueEmail("carla");
 
 test("1. Registrierung, Anmeldung und Profil vervollständigen (Onboarding ist Pflicht)", async ({ page }) => {
   await register(page, admin.name, admin.email);
@@ -141,6 +142,31 @@ test("8. Administrator sieht Benutzerübersicht und Aktivitätsprotokoll", async
   await expect(page.getByText("Registrierung").first()).toBeVisible();
   await expect(page.getByText("Unberechtigter Zugriff").first()).toBeVisible();
   await expect(page.getByText("Login").first()).toBeVisible();
+});
+
+test("Administrator legt einen Benutzer mit Startpasswort an", async ({ page, browser }) => {
+  await login(page, admin.email);
+  await page.goto("/admin");
+  await page.getByRole("button", { name: "Benutzer anlegen" }).click();
+  const dialog = page.getByRole("dialog");
+  await dialog.getByLabel("Anzeigename").fill("Carla");
+  await dialog.getByLabel("E-Mail-Adresse").fill(carla);
+  await dialog.getByText("Startpasswort selbst vergeben").click();
+  await dialog.getByLabel("Startpasswort", { exact: true }).fill(PASSWORD);
+  await page.screenshot({ path: "test-results/admin-benutzer-anlegen.png" });
+  await dialog.getByRole("button", { name: "Anlegen" }).click();
+  await expect(dialog.getByText(/Startpasswort anmelden/)).toBeVisible();
+  await dialog.getByRole("button", { name: "Fertig" }).click();
+  await expect(page.getByRole("link", { name: "Carla" })).toBeVisible();
+
+  const ctx = await browser.newContext();
+  const p = await ctx.newPage();
+  await p.goto("/anmelden");
+  await p.getByLabel("E-Mail-Adresse").fill(carla);
+  await p.getByLabel("Passwort").fill(PASSWORD);
+  await p.getByRole("button", { name: "Anmelden" }).click();
+  await expect(p).toHaveURL(/onboarding/);
+  await ctx.close();
 });
 
 test("9. Theme-Einstellungen bleiben nach erneutem Login erhalten", async ({ page }) => {

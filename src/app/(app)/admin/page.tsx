@@ -4,6 +4,7 @@ import { requireAdmin } from "@/server/page-auth";
 import { listUsers, systemOverview } from "@/server/services/admin";
 import { Badge, Button, Card, Field, Input, LinkButton, Pagination, Select, Stat } from "@/components/ui";
 import { formatDateTime } from "@/lib/dates";
+import { CreateUserButton } from "@/features/admin/create-user";
 
 export const metadata: Metadata = { title: "Administration" };
 
@@ -38,6 +39,10 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
       </div>
 
       <Card>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-base font-semibold">Benutzer</h2>
+          <CreateUserButton mailHint={overview.mailEnabled} />
+        </div>
         <form method="get" className="mb-4 grid gap-3 sm:grid-cols-4 sm:items-end">
           <Field label="Suche" htmlFor="q">
             <Input id="q" name="q" defaultValue={query.q} placeholder="Name oder E-Mail" />

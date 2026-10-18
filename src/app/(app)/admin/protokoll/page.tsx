@@ -38,6 +38,7 @@ const ACTION_LABELS: Record<string, string> = {
   "admin.user_role_changed": "Admin: Rolle geändert",
   "admin.sessions_revoked": "Admin: Sitzungen beendet",
   "admin.user_deleted": "Admin: Konto gelöscht",
+  "admin.user_created": "Admin: Konto angelegt",
   "admin.reset_link_created": "Admin: Reset-Link erzeugt",
   "admin.default_beverage_changed": "Admin: Standardgetränk geändert",
   "security.csrf_blocked": "CSRF-Anfrage blockiert",

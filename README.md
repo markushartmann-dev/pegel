@@ -49,7 +49,7 @@ Neu erzeugen: Demo-Server starten (`npm run build`, dann `E2E_PORT=3200 node scr
 - **Statistik & Kalender:** Tages-, Wochen- und Monatsübersichten, Kategorien, Wochentage, Vergleich mit dem Vorzeitraum; Monats-/Wochenkalender mit Tagesdetails.
 - **Sparschwein:** 5 € je Tag ohne Alkohol, +10 € je volle Woche am Stück, +20 € je ganzer Monat (konfigurierbar).
 - **Community:** Ranking nach Sparschwein und nach Menge, mit Anzeigename oder Pseudonym, jederzeit abwählbar.
-- **Administration:** Benutzer aktivieren/deaktivieren, Rollen, Sitzungen widerrufen, Reset-Links, Aktivitäts- und Sicherheitsprotokoll.
+- **Administration:** Benutzer anlegen (Einladungslink oder Startpasswort), aktivieren/deaktivieren, Rollen, Sitzungen widerrufen, Reset-Links, Aktivitäts- und Sicherheitsprotokoll.
 - **Sicherheit & Datenschutz:** Datenbanksitzungen mit „Angemeldet bleiben“, Rate-Limits, CSP, CSRF-Schutz, Datenexport und Kontolöschung, keine Tracker.
 - **Oberfläche:** Deutsch, responsiv, Hell/Dunkel/System und 5 Farbschemata, installierbar als PWA, optionale Push-Erinnerungen.
 
@@ -85,7 +85,7 @@ cp .env.example .env
 docker compose up -d --build
 ```
 
-Danach `APP_URL` im Browser öffnen und registrieren. **Das erste Konto wird automatisch Administrator.** Anschließend `REGISTRATION_ENABLED=false` setzen, wenn sich niemand Fremdes registrieren soll, und `docker compose up -d` ausführen.
+Danach `APP_URL` im Browser öffnen und registrieren. **Das erste Konto wird automatisch Administrator.** Anschließend `REGISTRATION_ENABLED=false` setzen, wenn sich niemand Fremdes registrieren soll, und `docker compose up -d` ausführen. Weitere Personen legst du dann unter *Administration → Benutzer anlegen* an – wahlweise mit Einladungslink (7 Tage gültig, die Person setzt ihr Passwort selbst) oder mit Startpasswort.
 
 Was beim Start passiert:
 
