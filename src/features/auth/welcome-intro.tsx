@@ -1,4 +1,4 @@
-import { BarChart3, ExternalLink, Lock, PiggyBank, Timer, Users } from "lucide-react";
+import { BarChart3, ExternalLink, Lock, PiggyBank, Smartphone, Timer, Users } from "lucide-react";
 
 export const PROJECT_URL = "https://github.com/markushartmann-dev/pegel";
 
@@ -8,6 +8,11 @@ const FEATURES = [
   { icon: Users, title: "Gemeinsam statt allein", text: "Freundliches Ranking in unserer Runde – mit Namen oder Pseudonym, jederzeit abwählbar." },
   { icon: Timer, title: "Transparente Schätzung", text: "Ein Modell schätzt, wann rechnerisch wieder 0,0 ‰ erreicht sind. Keine Messung und nie eine Entscheidungshilfe fürs Fahren." },
   { icon: Lock, title: "Deine Daten bleiben privat", text: "Einzelne Einträge sieht niemand außer dir. Selbst gehostet, ohne Tracker, Export und Löschen jederzeit." },
+  {
+    icon: Smartphone,
+    title: "Alles drin",
+    text: "Erfassen in Sekunden, Kalender mit Tagesdetails, Statistiken, eigene Getränke, fünf Farbschemata, Hell/Dunkel, installierbar als App mit optionalen Erinnerungen.",
+  },
 ];
 
 const SHOTS = [
@@ -76,10 +81,7 @@ export function WelcomeIntro() {
               <figcaption className="mt-1 text-xs text-fg-muted">Als App auf dem Handy</figcaption>
             </figure>
           </div>
-          <p className="text-sm text-fg-muted">
-            Erfassen in Sekunden, Kalender mit Tagesdetails, Statistiken, eigene Getränke, fünf Farbschemata, Hell/Dunkel, installierbar als App mit
-            optionalen Erinnerungen. Die Screenshots zeigen Demo-Daten.
-          </p>
+          <p className="text-xs text-fg-muted">Die Screenshots zeigen Demo-Daten.</p>
           <a
             href={PROJECT_URL}
             target="_blank"
