@@ -2,6 +2,11 @@
   "name": "pegel",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/markushartmann-dev/pegel.git"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
