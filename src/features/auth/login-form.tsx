@@ -70,6 +70,9 @@ export function LoginForm({
         <Link href="/passwort-vergessen" className="text-fg-muted hover:text-fg">
           Passwort vergessen?{!mailEnabled && " (über die Administration)"}
         </Link>
+        <Link href="/registrieren" className="text-fg-muted hover:text-fg">
+          Was ist Pegel?
+        </Link>
         {registrationEnabled && (
           <p className="text-fg-muted">
             Noch kein Konto?{" "}
