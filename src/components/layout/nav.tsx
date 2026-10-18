@@ -34,6 +34,7 @@ const MAIN = [
   { href: "/einstellungen", label: t.nav.settings, icon: Settings },
 ];
 
+// Reihenfolge der unteren Leiste; mit „Mehr“ als 5. Eintrag steht „Erfassen“ genau in der Mitte.
 const MOBILE_PRIMARY = ["/dashboard", "/kalender", "/erfassen", "/statistik"];
 
 function isActive(pathname: string, href: string) {
@@ -110,7 +111,7 @@ export function Sidebar({ name, email, isAdmin }: { name: string; email: string;
 export function MobileNav({ isAdmin }: { isAdmin: boolean }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const primary = MAIN.filter((i) => MOBILE_PRIMARY.includes(i.href));
+  const primary = MOBILE_PRIMARY.map((href) => MAIN.find((i) => i.href === href)!);
   const more = [...MAIN.filter((i) => !MOBILE_PRIMARY.includes(i.href)), ...(isAdmin ? [{ href: "/admin", label: t.nav.admin, icon: Shield }] : []), { href: "/hinweise", label: t.nav.model, icon: Info }];
   return (
     <>

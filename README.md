@@ -145,6 +145,7 @@ Alle Einstellungen über `.env` (Vorlage: [.env.example](.env.example)). Secrets
 | `MODEL_BETA_PER_HOUR` | – | Abbaurate β (Standard 0,15 ‰/h) |
 | `MODEL_ABSORPTION_MINUTES` | – | Resorptionsdauer je Getränk (Standard 30) |
 | `SAVINGS_PER_DAY` / `SAVINGS_WEEK_BONUS` / `SAVINGS_MONTH_BONUS` | – | Sparschwein in Euro: je Tag ohne Eintrag (5), je volle Woche am Stück (10), je kompletter Kalendermonat (20) |
+| `IMPRINT_NAME/STREET/CITY/COUNTRY/EMAIL/PHONE` | – | Angaben für Impressum und Verantwortlichen in den Datenschutzhinweisen – bewusst nur in der `.env`, nicht im Quellcode |
 | `SMTP_*` | – | Optionaler E-Mail-Versand (Bestätigung, Passwort-Reset) |
 | `VAPID_*` | – | Optionale Web-Push-Schlüssel |
 

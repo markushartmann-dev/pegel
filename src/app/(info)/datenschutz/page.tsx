@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Alert } from "@/components/ui";
+import { ImprintContact, imprintConfigured } from "@/components/imprint-contact";
 
 export const metadata: Metadata = { title: "Datenschutz" };
 
@@ -13,7 +14,7 @@ export default function PrivacyPage() {
       </Alert>
 
       <h2>1. Verantwortlicher</h2>
-      <p>[Name und Anschrift des Betreibers dieser Installation, E-Mail-Adresse – bitte ergänzen]</p>
+      {imprintConfigured() ? <ImprintContact /> : <p>[Name und Anschrift des Betreibers dieser Installation, E-Mail-Adresse – über IMPRINT_* in der .env ergänzen]</p>}
 
       <h2>2. Welche Daten verarbeitet werden</h2>
       <ul>

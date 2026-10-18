@@ -60,6 +60,15 @@ export const env = {
     weekBonus: num("SAVINGS_WEEK_BONUS", 10, 0, 1000),
     monthBonus: num("SAVINGS_MONTH_BONUS", 20, 0, 10000),
   },
+  /** Angaben für Impressum und Datenschutzhinweise (nur in .env, nicht im Quellcode) */
+  imprint: {
+    name: process.env.IMPRINT_NAME?.trim() ?? "",
+    street: process.env.IMPRINT_STREET?.trim() ?? "",
+    city: process.env.IMPRINT_CITY?.trim() ?? "",
+    country: process.env.IMPRINT_COUNTRY?.trim() ?? "",
+    email: process.env.IMPRINT_EMAIL?.trim() ?? "",
+    phone: process.env.IMPRINT_PHONE?.trim() ?? "",
+  },
   smtp: {
     host: process.env.SMTP_HOST ?? "",
     port: num("SMTP_PORT", 587, 1, 65535),
