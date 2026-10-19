@@ -1,4 +1,5 @@
 import { BarChart3, ExternalLink, Lock, PiggyBank, Smartphone, Timer, Users } from "lucide-react";
+import { IosInstallGuide } from "@/features/help/ios-install-guide";
 
 export const PROJECT_URL = "https://github.com/markushartmann-dev/pegel";
 
@@ -91,6 +92,15 @@ export function WelcomeIntro() {
             <ExternalLink className="size-4" aria-hidden />
             Alle Details und Quellcode auf GitHub
           </a>
+        </div>
+      </details>
+      <details className="group rounded-[var(--radius)] border border-border bg-card/70 p-4 backdrop-blur">
+        <summary className="cursor-pointer list-none text-sm font-medium marker:hidden">
+          <span className="text-primary group-open:hidden">▸ Als App aufs iPhone – Schritt für Schritt</span>
+          <span className="hidden text-primary group-open:inline">▾ Als App aufs iPhone – Schritt für Schritt</span>
+        </summary>
+        <div className="mt-4">
+          <IosInstallGuide compact />
         </div>
       </details>
     </section>
