@@ -10,6 +10,8 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  // CHANGELOG.md wird zur Laufzeit gelesen und muss deshalb ins Standalone-Image
+  outputFileTracingIncludes: { "/**": ["./CHANGELOG.md"] },
   poweredByHeader: false,
   reactStrictMode: true,
   turbopack: {

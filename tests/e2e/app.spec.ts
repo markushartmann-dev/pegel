@@ -213,6 +213,18 @@ test("Auf Reisen übernimmt die App die Zeitzone des Geräts", async ({ browser 
   await ctx.close();
 });
 
+test("Neuigkeiten zeigen das Changelog, auch ohne Anmeldung", async ({ browser, page }) => {
+  const ctx = await browser.newContext();
+  const anon = await ctx.newPage();
+  await anon.goto("/neuigkeiten");
+  await expect(anon.getByRole("heading", { name: /Version 1\.0\.0/ })).toBeVisible();
+  await expect(anon.getByText("aktuell")).toBeVisible();
+  await ctx.close();
+  await login(page, admin.email);
+  await page.getByRole("link", { name: /^Version \d/ }).click();
+  await expect(page).toHaveURL(/neuigkeiten/);
+});
+
 test("Sicherheits-Header und kein Caching privater API-Antworten", async ({ page }) => {
   const res = await page.goto("/anmelden");
   const h = res!.headers();

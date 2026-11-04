@@ -20,6 +20,7 @@ export const de = {
     admin: "Administration",
     logout: "Abmelden",
     model: "Modell & Hinweise",
+    news: "Neuigkeiten",
     privacy: "Datenschutz",
     help: "Hilfe",
     imprint: "Impressum",

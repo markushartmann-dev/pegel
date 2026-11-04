@@ -16,6 +16,7 @@ import {
   Shield,
   Users,
   Info,
+  Megaphone,
   X,
 } from "lucide-react";
 import { cn } from "@/components/ui";
@@ -98,6 +99,10 @@ export function Sidebar({ name, email, isAdmin }: { name: string; email: string;
           <Info className="size-4" aria-hidden />
           {t.nav.model}
         </Link>
+        <Link href="/neuigkeiten" className="mb-1 flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-fg-muted hover:bg-muted hover:text-fg">
+          <Megaphone className="size-4" aria-hidden />
+          {t.nav.news}
+        </Link>
         <div className="px-3 py-2">
           <p className="truncate text-sm font-medium">{name}</p>
           <p className="truncate text-xs text-fg-muted">{email}</p>
@@ -112,7 +117,7 @@ export function MobileNav({ isAdmin }: { isAdmin: boolean }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const primary = MOBILE_PRIMARY.map((href) => MAIN.find((i) => i.href === href)!);
-  const more = [...MAIN.filter((i) => !MOBILE_PRIMARY.includes(i.href)), ...(isAdmin ? [{ href: "/admin", label: t.nav.admin, icon: Shield }] : []), { href: "/hinweise", label: t.nav.model, icon: Info }];
+  const more = [...MAIN.filter((i) => !MOBILE_PRIMARY.includes(i.href)), ...(isAdmin ? [{ href: "/admin", label: t.nav.admin, icon: Shield }] : []), { href: "/hinweise", label: t.nav.model, icon: Info }, { href: "/neuigkeiten", label: t.nav.news, icon: Megaphone }];
   return (
     <>
       <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-bg/85 px-4 backdrop-blur lg:hidden pt-[env(safe-area-inset-top)] box-content">

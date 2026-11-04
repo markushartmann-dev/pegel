@@ -2,10 +2,12 @@ import Link from "next/link";
 import { requireOnboardedUser } from "@/server/page-auth";
 import { MobileNav, SessionKeepAlive, Sidebar } from "@/components/layout/nav";
 import { TimezoneSync } from "@/components/layout/timezone-sync";
+import { getAppVersion } from "@/server/changelog";
 import { t } from "@/i18n";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await requireOnboardedUser();
+  const version = getAppVersion();
   return (
     <div className="flex min-h-dvh">
       <Sidebar name={user.name} email={user.email} isAdmin={user.role === "ADMIN"} />
@@ -27,6 +29,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             {" · "}
             <Link href="/hilfe" className="underline underline-offset-2 hover:text-fg">
               {t.nav.help}
+            </Link>
+            {" · "}
+            <Link href="/neuigkeiten" className="underline underline-offset-2 hover:text-fg">
+              {version ? `Version ${version}` : t.nav.news}
             </Link>
           </p>
         </footer>

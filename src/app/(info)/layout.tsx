@@ -25,6 +25,7 @@ export default async function InfoLayout({ children }: { children: React.ReactNo
           <Link href="/datenschutz">{t.nav.privacy}</Link>
           <Link href="/impressum">{t.nav.imprint}</Link>
           <Link href="/hilfe">{t.nav.help}</Link>
+          <Link href="/neuigkeiten">{t.nav.news}</Link>
         </nav>
       </div>
     </div>

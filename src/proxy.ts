@@ -16,6 +16,7 @@ const PUBLIC_PATHS = [
   "/hinweise",
   "/impressum",
   "/hilfe",
+  "/neuigkeiten",
   "/offline",
 ];
 

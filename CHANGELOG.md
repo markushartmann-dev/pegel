@@ -6,6 +6,11 @@ Alle nennenswerten Änderungen an Pegel. Format nach [Keep a Changelog](https://
 
 ## [Unveröffentlicht]
 
+## [1.4.0] – 2026-11-04
+
+### Hinzugefügt
+- **Neuigkeiten in der App:** Die Seite `/neuigkeiten` zeigt alle Versionen mit ihren Änderungen, direkt aus dieser Datei erzeugt. Erreichbar über die Navigation und über die Versionsnummer in der Fußzeile.
+
 ## [1.3.0] – 2026-11-04
 
 ### Hinzugefügt
@@ -53,7 +58,8 @@ Erste veröffentlichte Version.
 - Zeitstempel wurden verschoben gespeichert, wenn PostgreSQL nicht in UTC läuft (z. B. `TZ=Europe/Berlin`). Die App verbindet sich jetzt immer mit `TimeZone=UTC`; eine Migration korrigiert bestehende Daten einmalig.
 - Hinter Cloudflare wird die Client-IP aus `CF-Connecting-IP` gelesen, damit Rate-Limits nicht über `X-Forwarded-For` umgangen werden können.
 
-[Unveröffentlicht]: https://github.com/markushartmann-dev/pegel/compare/v1.3.0...HEAD
+[Unveröffentlicht]: https://github.com/markushartmann-dev/pegel/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/markushartmann-dev/pegel/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/markushartmann-dev/pegel/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/markushartmann-dev/pegel/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/markushartmann-dev/pegel/compare/v1.0.0...v1.1.0
