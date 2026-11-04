@@ -9,7 +9,7 @@ Alle nennenswerten Änderungen an Pegel. Format nach [Keep a Changelog](https://
 ## [1.4.0] – 2026-11-04
 
 ### Hinzugefügt
-- **Neuigkeiten in der App:** Die Seite `/neuigkeiten` zeigt alle Versionen mit ihren Änderungen, direkt aus dieser Datei erzeugt. Erreichbar über die Navigation und über die Versionsnummer in der Fußzeile.
+- **Neuigkeiten in der App:** Die Seite `/neuigkeiten` zeigt alle Versionen mit ihren Änderungen, direkt aus der `CHANGELOG.md` erzeugt. Erreichbar über die Navigation und über die Versionsnummer in der Fußzeile.
 
 ## [1.3.0] – 2026-11-04
 
