@@ -98,6 +98,22 @@ export function zonedTimeToUtc(
   return new Date(local - before);
 }
 
+/** Anzeigename einer Zeitzone: "Europe/London" → "London", "America/New_York" → "New York". */
+export function timeZoneCity(tz: string): string {
+  return (tz.split("/").pop() ?? tz).replace(/_/g, " ");
+}
+
+/** Auswahlliste aller Zeitzonen; die übergebene ist immer enthalten (z. B. "UTC"). */
+export function timeZoneOptions(current?: string): string[] {
+  let zones: string[];
+  try {
+    zones = (Intl as unknown as { supportedValuesOf(k: string): string[] }).supportedValuesOf("timeZone");
+  } catch {
+    zones = ["Europe/Berlin", "Europe/London", "UTC"];
+  }
+  return current && !zones.includes(current) ? [current, ...zones] : zones;
+}
+
 const LOCAL_DT = /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})$/;
 const DAY_KEY = /^(\d{4})-(\d{2})-(\d{2})$/;
 

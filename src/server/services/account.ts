@@ -11,10 +11,18 @@ export async function updateSettings(user: CurrentUser, raw: unknown, headers?: 
   const updated = await prisma.user.update({
     where: { id: user.id },
     data: input,
-    select: { name: true, timezone: true, themeMode: true, colorScheme: true },
+    select: { name: true, timezone: true, timezoneAuto: true, themeMode: true, colorScheme: true },
   });
   await audit({ action: "settings.updated", actorId: user.id, targetUserId: user.id, headers, metadata: { fields: Object.keys(input) } });
   return updated;
+}
+
+/** Vom Gerät gemeldete Zeitzone übernehmen, sofern der Benutzer das nicht abgeschaltet hat. */
+export async function syncDeviceTimezone(user: CurrentUser, timezone: string, headers?: Headers) {
+  if (!user.timezoneAuto || user.timezone === timezone) return { changed: false, timezone: user.timezone };
+  await prisma.user.update({ where: { id: user.id }, data: { timezone } });
+  await audit({ action: "settings.updated", actorId: user.id, targetUserId: user.id, headers, metadata: { timezone, source: "device" } });
+  return { changed: true, timezone };
 }
 
 /** Vollständiger Datenexport (Art. 15/20 DSGVO) als JSON. Enthält keine Passwort-Hashes oder Tokens. */
@@ -34,6 +42,7 @@ export async function exportAccount(user: CurrentUser, headers?: Headers) {
       lastLogoutAt: true,
       profileUpdatedAt: true,
       timezone: true,
+      timezoneAuto: true,
       themeMode: true,
       colorScheme: true,
       notificationsEnabled: true,

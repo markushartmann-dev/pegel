@@ -25,7 +25,7 @@ export default async function LogPage({ searchParams }: { searchParams: Promise<
       />
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">
-          <LogForm beverages={beverages} timezone={user.timezone} defaultDay={day === today ? undefined : day} />
+          <LogForm key={user.timezone} beverages={beverages} timezone={user.timezone} defaultDay={day === today ? undefined : day} />
         </Card>
         <Card>
           <CardHeader title={day === today ? "Heute erfasst" : formatDayKey(day, "long")} description={entries.length ? `Summe: ${formatGrams(sum)}` : undefined} />

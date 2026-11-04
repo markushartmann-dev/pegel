@@ -99,6 +99,8 @@ model User {
   profileUpdatedAt DateTime? @db.Timestamptz(3)
 
   timezone            String      @default("Europe/Berlin")
+  /// Zeitzone automatisch vom Gerät übernehmen (z. B. auf Reisen)
+  timezoneAuto        Boolean     @default(true)
   onboardingCompleted Boolean     @default(false)
   themeMode           ThemeMode   @default(SYSTEM)
   colorScheme         ColorScheme @default(MIDNIGHT)

@@ -4,11 +4,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Beer, GlassWater, Minus, Plus, Wine, Citrus, Martini, Settings2, CupSoda } from "lucide-react";
-import { Alert, Button, Field, Input, Textarea, cn } from "@/components/ui";
+import { Alert, Button, Field, Input, Select, Textarea, cn } from "@/components/ui";
 import { useToast } from "@/components/ui/client";
 import { api, ApiError } from "@/lib/api-client";
 import { alcoholGrams } from "@/lib/calculations/alcohol";
-import { toLocalDateTimeInput } from "@/lib/dates";
+import { parseLocalDateTime, timeZoneOptions, toLocalDateTimeInput } from "@/lib/dates";
 import { formatNumber, t } from "@/i18n";
 import type { BeverageDTO } from "@/server/services/beverages";
 
@@ -41,6 +41,7 @@ export function LogForm({
   const [selected, setSelected] = useState<string | null>(null);
   const [servings, setServings] = useState(1);
   const [time, setTime] = useState(initialTime);
+  const [entryTz, setEntryTz] = useState(timezone);
   const [custom, setCustom] = useState(false);
   const [volume, setVolume] = useState("");
   const [abv, setAbv] = useState("");
@@ -82,7 +83,7 @@ export function LogForm({
         beverageId: bev.id,
         servings,
         consumedAtLocal: time,
-        timezone,
+        timezone: entryTz,
         note: note.trim() || null,
         clientRequestId: requestId,
       };
@@ -98,6 +99,7 @@ export function LogForm({
       setCustom(false);
       setNote("");
       setTime(defaultDay ? `${defaultDay}T20:00` : toLocalDateTimeInput(new Date(), timezone));
+      setEntryTz(timezone);
       router.refresh();
       onDone?.();
     } catch (err) {
@@ -173,10 +175,27 @@ export function LogForm({
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Zeitpunkt" htmlFor="consumedAt" error={fields.consumedAtLocal} hint={`Zeitzone: ${timezone}`}>
+            <Field label="Zeitpunkt (Ortszeit)" htmlFor="consumedAt" error={fields.consumedAtLocal}>
               <Input id="consumedAt" type="datetime-local" value={time} onChange={(e) => setTime(e.target.value)} required />
             </Field>
-            <Field label={<>Notiz <span className="font-normal text-fg-muted">({t.common.optional})</span></>} htmlFor="note" error={fields.note}>
+            <Field label="Zeitzone" htmlFor="entryTz" hint="Beim Nachtragen einer Reise hier den damaligen Ort wählen.">
+              <Select
+                id="entryTz"
+                value={entryTz}
+                onChange={(e) => {
+                  const parsed = parseLocalDateTime(time, entryTz);
+                  if (parsed) setTime(toLocalDateTimeInput(parsed, e.target.value));
+                  setEntryTz(e.target.value);
+                }}
+              >
+                {timeZoneOptions(entryTz).map((z) => (
+                  <option key={z} value={z}>
+                    {z}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+            <Field className="sm:col-span-2" label={<>Notiz <span className="font-normal text-fg-muted">({t.common.optional})</span></>} htmlFor="note" error={fields.note}>
               <Textarea id="note" value={note} onChange={(e) => setNote(e.target.value)} maxLength={300} rows={1} className="min-h-10" />
             </Field>
           </div>

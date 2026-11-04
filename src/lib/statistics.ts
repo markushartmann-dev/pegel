@@ -10,6 +10,8 @@ export interface StatEntry {
   servings: number;
   category: string;
   beverageName: string;
+  /** Zeitzone der Erfassung: bestimmt den Kalendertag (Ortszeit, auch auf Reisen) */
+  timezone?: string;
 }
 
 export interface DayStat {
@@ -36,7 +38,7 @@ const round2 = (n: number) => Math.round(n * 100) / 100;
 export function aggregateByDay(entries: readonly StatEntry[], days: readonly string[], tz: string): DayStat[] {
   const map = new Map<string, DayStat>(days.map((d) => [d, { day: d, grams: 0, drinks: 0, servings: 0 }]));
   for (const e of entries) {
-    const k = dayKey(e.consumedAt, tz);
+    const k = dayKey(e.consumedAt, e.timezone ?? tz);
     const s = map.get(k);
     if (!s) continue; // außerhalb des Zeitraums
     s.grams += e.alcoholGrams;

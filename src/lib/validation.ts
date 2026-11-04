@@ -112,6 +112,7 @@ export const onboardingSchema = z.object({
 export const settingsSchema = z.object({
   name: trimmed(50).min(2, "Anzeigename muss mindestens 2 Zeichen lang sein.").optional(),
   timezone: timezoneSchema.optional(),
+  timezoneAuto: z.boolean().optional(),
   themeMode: themeModeEnum.optional(),
   colorScheme: colorSchemeEnum.optional(),
 });

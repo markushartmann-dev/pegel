@@ -200,6 +200,19 @@ test("Bearbeiten und Löschen eines Eintrags im Kalender", async ({ page }) => {
   await expect(page.getByText("An diesem Tag wurde nichts erfasst.")).toBeVisible();
 });
 
+test("Auf Reisen übernimmt die App die Zeitzone des Geräts", async ({ browser }) => {
+  const ctx = await browser.newContext({ timezoneId: "Europe/London", locale: "de-DE" });
+  const page = await ctx.newPage();
+  await login(page, anna.email);
+  await expect(page.getByText(/Zeitzone auf London umgestellt/)).toBeVisible();
+  const me = await page.evaluate(async () => (await fetch("/api/v1/me")).json());
+  expect(me.user.timezone).toBe("Europe/London");
+  await page.goto("/erfassen");
+  await page.getByRole("button", { name: /^Sekt 100 ml/ }).click();
+  await expect(page.getByLabel("Zeitzone")).toHaveValue("Europe/London");
+  await ctx.close();
+});
+
 test("Sicherheits-Header und kein Caching privater API-Antworten", async ({ page }) => {
   const res = await page.goto("/anmelden");
   const h = res!.headers();

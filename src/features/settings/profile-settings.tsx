@@ -19,17 +19,20 @@ export function ProfileSettings({
   name: initialName,
   email,
   timezone: initialTz,
+  timezoneAuto: initialAuto,
   profile,
 }: {
   name: string;
   email: string;
   timezone: string;
+  timezoneAuto: boolean;
   profile: ProfileValues | null;
 }) {
   const router = useRouter();
   const toast = useToast();
   const [name, setName] = useState(initialName);
   const [timezone, setTimezone] = useState(initialTz);
+  const [timezoneAuto, setTimezoneAuto] = useState(initialAuto);
   const [values, setValues] = useState<ProfileValues>(profile ?? emptyProfile);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
@@ -44,7 +47,7 @@ export function ProfileSettings({
     setSaving("account");
     setError(null);
     try {
-      await api("/api/v1/me", { method: "PATCH", body: { name: name.trim(), timezone } });
+      await api("/api/v1/me", { method: "PATCH", body: { name: name.trim(), timezone, timezoneAuto } });
       toast("Konto gespeichert.");
       router.refresh();
     } catch (err) {
@@ -79,8 +82,15 @@ export function ProfileSettings({
           <Field label="Anzeigename" htmlFor="name">
             <Input id="name" value={name} onChange={(e) => setName(e.target.value)} maxLength={50} />
           </Field>
-          <Field label="Zeitzone" htmlFor="tz" hint="Bestimmt Tagesgrenzen in Kalender und Statistik.">
-            <Select id="tz" value={timezone} onChange={(e) => setTimezone(e.target.value)}>
+          <label className="flex items-start gap-3 text-sm">
+            <input type="checkbox" checked={timezoneAuto} onChange={(e) => setTimezoneAuto(e.target.checked)} className="mt-0.5 size-4 accent-[var(--primary)]" />
+            <span>
+              Zeitzone automatisch vom Gerät übernehmen
+              <span className="block text-xs text-fg-muted">Praktisch auf Reisen: Uhrzeiten, „heute“ und Erinnerungen folgen deinem Aufenthaltsort.</span>
+            </span>
+          </label>
+          <Field label="Zeitzone" htmlFor="tz" hint="Bestimmt „heute“ und die Tagesgrenzen. Bereits erfasste Einträge behalten den Tag ihrer Ortszeit.">
+            <Select id="tz" value={timezone} onChange={(e) => setTimezone(e.target.value)} disabled={timezoneAuto}>
               {tzList.map((z) => (
                 <option key={z} value={z}>
                   {z}

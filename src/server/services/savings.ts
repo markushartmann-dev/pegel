@@ -11,11 +11,11 @@ interface SavingsUser {
   createdAt: Date;
 }
 
-/** Kalendertage (in der Zeitzone des Benutzers) mit mindestens einem Eintrag seit `fromDay`. */
+/** Kalendertage mit mindestens einem Eintrag seit `fromDay` – nach der Ortszeit des jeweiligen Eintrags. */
 async function drinkDays(userId: string, tz: string, fromDay: string): Promise<string[]> {
-  const from = startOfDay(fromDay, tz);
+  const from = new Date(startOfDay(fromDay, tz).getTime() - 26 * 3_600_000);
   const rows = await prisma.$queryRaw<{ day: string }[]>`
-    SELECT DISTINCT to_char(("consumedAt" AT TIME ZONE ${tz}), 'YYYY-MM-DD') AS day
+    SELECT DISTINCT to_char(("consumedAt" AT TIME ZONE "timezone"), 'YYYY-MM-DD') AS day
     FROM consumption_entry
     WHERE "userId" = ${userId} AND "consumedAt" >= ${from}`;
   return rows.map((r) => r.day);

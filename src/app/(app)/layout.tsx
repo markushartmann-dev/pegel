@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireOnboardedUser } from "@/server/page-auth";
 import { MobileNav, SessionKeepAlive, Sidebar } from "@/components/layout/nav";
+import { TimezoneSync } from "@/components/layout/timezone-sync";
 import { t } from "@/i18n";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -31,6 +32,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </footer>
       </div>
       <SessionKeepAlive />
+      <TimezoneSync timezone={user.timezone} auto={user.timezoneAuto} />
     </div>
   );
 }

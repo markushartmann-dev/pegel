@@ -21,6 +21,10 @@ A [g] = V [ml] × (Alkoholgehalt [% vol] / 100) × 0,789 g/ml
 | Wein 0,2 l | 200 ml | 12,0 | 18,9 |
 | Schnaps 2 cl | 20 ml | 40,0 | 6,3 |
 | Aperol Spritz | 150 ml | 9,2 | 10,9 |
+| Bier | 400 ml | 5,0 | 15,8 |
+| Caipirinha | 40 ml | 40,0 | 12,6 |
+| Hefe-Weißbier Alkoholfrei | 500 ml | 0,5 | 2,0 |
+| Jack Daniel's & Coca-Cola | 330 ml | 10,0 | 26,0 |
 
 Die Alkoholgehalte sind typische Startwerte. Eigene Getränke erlauben den genauen Wert vom Etikett; bei der Erfassung kann man Volumen und Alkoholgehalt zusätzlich nur für diesen Eintrag anpassen.
 
@@ -70,4 +74,4 @@ Mageninhalt, Trinkgeschwindigkeit innerhalb eines Getränks, Resorptionsdefizit,
 
 ## 6. Tagesgrenzen und Statistik
 
-Ein Tag ist der Kalendertag in der Zeitzone des Benutzers (00:00–24:00 lokal; an Umstellungstagen 23 bzw. 25 Stunden). Lokale Eingaben, die es wegen der Sommerzeitumstellung nicht gibt (z. B. 02:30 am letzten Märzsonntag), werden um die Lücke nach vorn verschoben; doppelt vorkommende Uhrzeiten im Oktober gelten als erstes Vorkommen.
+Jeder Eintrag speichert die Zeitzone seiner Erfassung und zählt zum Kalendertag, der dort galt (00:00–24:00 Ortszeit; an Umstellungstagen 23 bzw. 25 Stunden). Ein Getränk um 23:30 Uhr in London gehört also zu diesem Tag, auch wenn es in Berlin schon 00:30 Uhr war. „Heute“ richtet sich nach der aktuellen Zeitzone des Benutzers, die standardmäßig automatisch vom Gerät übernommen wird (in den Einstellungen abschaltbar). Lokale Eingaben, die es wegen der Sommerzeitumstellung nicht gibt (z. B. 02:30 am letzten Märzsonntag), werden um die Lücke nach vorn verschoben; doppelt vorkommende Uhrzeiten im Oktober gelten als erstes Vorkommen.

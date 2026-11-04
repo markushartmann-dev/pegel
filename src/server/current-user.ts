@@ -11,6 +11,7 @@ export const currentUserSelect = {
   role: true,
   status: true,
   timezone: true,
+  timezoneAuto: true,
   onboardingCompleted: true,
   themeMode: true,
   colorScheme: true,
@@ -26,6 +27,7 @@ export type CurrentUser = {
   role: "USER" | "ADMIN";
   status: "ACTIVE" | "DEACTIVATED";
   timezone: string;
+  timezoneAuto: boolean;
   onboardingCompleted: boolean;
   themeMode: "SYSTEM" | "LIGHT" | "DARK";
   colorScheme: "MIDNIGHT" | "OCEAN" | "FOREST" | "SUNSET" | "LIGHT";

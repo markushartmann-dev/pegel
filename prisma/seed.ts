@@ -18,6 +18,12 @@ async function main() {
       // Bestehende Standardgetränke nicht überschreiben (Admin könnte sie angepasst haben)
       continue;
     }
+    // Identische eigene Getränke archivieren, damit sie nicht doppelt zur Auswahl stehen.
+    // Bestehende Einträge bleiben unverändert (Snapshot), das Archivieren lässt sich rückgängig machen.
+    await prisma.beverage.updateMany({
+      where: { ownerId: { not: null }, isActive: true, name: b.name, volumeMl: b.volumeMl, abv: b.abv },
+      data: { isActive: false },
+    });
     await prisma.beverage.create({
       data: {
         name: b.name,

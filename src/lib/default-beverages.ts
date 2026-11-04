@@ -23,4 +23,8 @@ export const DEFAULT_BEVERAGES: readonly DefaultBeverage[] = [
   { name: "Schnaps 2 cl", description: "Spirituose mit 40 % vol", volumeMl: 20, abv: 40.0, category: "SPIRITS", icon: "glass-water" },
   // 75 ml Prosecco (11 %) + 50 ml Aperol (11 %) + 25 ml Soda = 150 ml mit ca. 9,2 % vol (ohne Eis)
   { name: "Aperol Spritz", description: "3 Teile Prosecco, 2 Teile Aperol, Schuss Soda", volumeMl: 150, abv: 9.2, category: "MIXED", icon: "citrus" },
+  { name: "Bier", description: "Glas Bier, 0,4 l", volumeMl: 400, abv: 5.0, category: "BEER", icon: "beer" },
+  { name: "Caipirinha", description: "Mit 4 cl Cachaça", volumeMl: 40, abv: 40.0, category: "SPIRITS", icon: "glass-water" },
+  { name: "Hefe-Weißbier Alkoholfrei", description: "Enthält bis zu 0,5 % vol", volumeMl: 500, abv: 0.5, category: "BEER", icon: "beer" },
+  { name: "Jack Daniel's & Coca-Cola", description: "Dose, 0,33 l", volumeMl: 330, abv: 10.0, category: "MIXED", icon: "citrus" },
 ];

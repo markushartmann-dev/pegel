@@ -21,7 +21,7 @@ import {
   previousRange,
   type Period,
 } from "@/lib/dates";
-import { entriesBetween } from "./entries";
+import { entriesBetween, entriesForDays } from "./entries";
 
 function toStat(rows: Awaited<ReturnType<typeof entriesBetween>>): StatEntry[] {
   return rows.map((r) => ({
@@ -30,6 +30,7 @@ function toStat(rows: Awaited<ReturnType<typeof entriesBetween>>): StatEntry[] {
     servings: r.servings,
     category: r.category,
     beverageName: r.beverageName,
+    timezone: r.timezone,
   }));
 }
 
@@ -38,9 +39,9 @@ export async function dashboardSummary(user: CurrentUser, now = new Date()) {
   const tz = user.timezone;
   const r30 = periodRange("30d", now, tz);
   const prev30 = previousRange(r30, tz);
-  const rows = toStat(await entriesBetween(user.id, prev30.from, r30.to));
-  const cur = rows.filter((r) => r.consumedAt >= r30.from);
-  const prev = rows.filter((r) => r.consumedAt < r30.from);
+  const rows = toStat(await entriesForDays(user.id, prev30.fromDay, r30.toDay, tz));
+  const cur = rows.filter((r) => dayKey(r.consumedAt, r.timezone ?? tz) >= r30.fromDay);
+  const prev = rows.filter((r) => dayKey(r.consumedAt, r.timezone ?? tz) < r30.fromDay);
   const byDay = aggregateByDay(cur, r30.days, tz);
   const today = dayKey(now, tz);
   const last7 = byDay.slice(-7);
@@ -66,8 +67,8 @@ export async function periodStatistics(user: CurrentUser, period: Period, custom
   const range = periodRange(period, now, tz, custom);
   const prev = previousRange(range, tz);
   const [curRows, prevRows] = await Promise.all([
-    entriesBetween(user.id, range.from, range.to).then(toStat),
-    entriesBetween(user.id, prev.from, prev.to).then(toStat),
+    entriesForDays(user.id, range.fromDay, range.toDay, tz).then(toStat),
+    entriesForDays(user.id, prev.fromDay, prev.toDay, tz).then(toStat),
   ]);
   const byDay = aggregateByDay(curRows, range.days, tz);
   const t = totals(byDay);
@@ -77,7 +78,7 @@ export async function periodStatistics(user: CurrentUser, period: Period, custom
   const today = dayKey(now, tz);
   const weeksRange = makeRange("custom", addDays(today, -83), today, tz);
   const monthsRange = makeRange("custom", addMonths(firstOfMonth(today), -11), lastOfMonth(today), tz);
-  const longRows = toStat(await entriesBetween(user.id, monthsRange.from, monthsRange.to));
+  const longRows = toStat(await entriesForDays(user.id, monthsRange.fromDay, monthsRange.toDay, tz));
   const weekly = aggregateBuckets(aggregateByDay(longRows, weeksRange.days, tz), "week");
   const monthly = aggregateBuckets(aggregateByDay(longRows, monthsRange.days, tz), "month");
 
@@ -100,7 +101,7 @@ export async function monthOverview(user: CurrentUser, month: string) {
   const tz = user.timezone;
   const first = firstOfMonth(`${month}-01`);
   const range = makeRange("custom", first, lastOfMonth(first), tz);
-  const rows = toStat(await entriesBetween(user.id, range.from, range.to));
+  const rows = toStat(await entriesForDays(user.id, range.fromDay, range.toDay, tz));
   const byDay = aggregateByDay(rows, range.days, tz);
   return { month: first.slice(0, 7), days: byDay, totals: totals(byDay) };
 }

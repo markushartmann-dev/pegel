@@ -6,6 +6,16 @@ Alle nennenswerten Änderungen an Pegel. Format nach [Keep a Changelog](https://
 
 ## [Unveröffentlicht]
 
+## [1.3.0] – 2026-11-04
+
+### Hinzugefügt
+- **Zeitzone auf Reisen:** Die App übernimmt die Zeitzone des Geräts automatisch und meldet die Umstellung kurz. Uhrzeiten, „heute“ und Erinnerungen folgen so dem Aufenthaltsort. Abschaltbar unter Einstellungen → Profil.
+- **Zeitzone je Eintrag:** Beim Erfassen und Bearbeiten wählbar, z. B. zum Nachtragen einer Reise. Beim Wechsel bleibt der tatsächliche Zeitpunkt gleich, die Ortszeit wird umgerechnet.
+- **Neue Standardgetränke:** Bier (400 ml, 5,0 %), Caipirinha (40 ml, 40,0 %), Hefe-Weißbier Alkoholfrei (500 ml, 0,5 %), Jack Daniel's & Coca-Cola (330 ml, 10,0 %). Identische eigene Getränke werden beim Update archiviert, damit nichts doppelt zur Auswahl steht; bestehende Einträge bleiben unverändert.
+
+### Geändert
+- Einträge zählen in Kalender, Statistik und Sparschwein zum **Kalendertag ihrer Ortszeit** und zeigen diese an, bei abweichender Zeitzone mit Ort, z. B. „20:00 Uhr (London)“.
+
 ## [1.2.0] – 2026-10-19
 
 ### Hinzugefügt
@@ -43,7 +53,8 @@ Erste veröffentlichte Version.
 - Zeitstempel wurden verschoben gespeichert, wenn PostgreSQL nicht in UTC läuft (z. B. `TZ=Europe/Berlin`). Die App verbindet sich jetzt immer mit `TimeZone=UTC`; eine Migration korrigiert bestehende Daten einmalig.
 - Hinter Cloudflare wird die Client-IP aus `CF-Connecting-IP` gelesen, damit Rate-Limits nicht über `X-Forwarded-For` umgangen werden können.
 
-[Unveröffentlicht]: https://github.com/markushartmann-dev/pegel/compare/v1.2.0...HEAD
+[Unveröffentlicht]: https://github.com/markushartmann-dev/pegel/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/markushartmann-dev/pegel/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/markushartmann-dev/pegel/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/markushartmann-dev/pegel/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/markushartmann-dev/pegel/releases/tag/v1.0.0

@@ -11,6 +11,8 @@ export default function HelpPage() {
       <p>Unter „Erfassen“ ein Getränk antippen, Anzahl der Portionen wählen und bei Bedarf den Zeitpunkt anpassen. Für vergangene Tage im Kalender den Tag wählen und „Nachtragen“ nutzen.</p>
       <h2>Eigenes Getränk mit genauem Alkoholgehalt</h2>
       <p>Unter „Getränke“ → „Neu“ Name, Volumen und Alkoholgehalt vom Etikett eintragen. Archivierte Getränke bleiben in alten Einträgen erhalten.</p>
+      <h2>Auf Reisen</h2>
+      <p>Pegel übernimmt die Zeitzone deines Geräts automatisch, Uhrzeiten und „heute“ passen also auch im Ausland. Jeder Eintrag zählt zum Tag seiner Ortszeit. Vergangene Einträge kannst du im Bearbeiten-Dialog einer anderen Zeitzone zuordnen. Die Automatik lässt sich unter Einstellungen → Profil abschalten.</p>
       <h2>Sparschwein</h2>
       <p>Für jeden abgeschlossenen Tag ohne erfasste Getränke wandern 5 € ins Sparschwein, für jede volle Woche am Stück 10 € extra und für jeden kompletten Kalendermonat 20 € extra. Der heutige Tag zählt ab Mitternacht. Das Sparschwein-Ranking auf der Community-Seite vergleicht die Teilnehmenden.</p>
       <h2 id="app-installieren">Als App aufs iPhone – Schritt für Schritt</h2>

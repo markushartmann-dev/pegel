@@ -43,7 +43,7 @@ export function toEntryDTO(e: EntryRow, tz: string): EntryDTO {
     consumedAt: e.consumedAt.toISOString(),
     timezone: e.timezone,
     note: e.note,
-    day: dayKey(e.consumedAt, tz),
+    day: dayKey(e.consumedAt, e.timezone || tz),
   };
 }
 
@@ -176,9 +176,27 @@ export async function entriesBetween(userId: string, from: Date, to: Date) {
   });
 }
 
-/** Einträge eines Kalendertags (lokal). */
+/**
+ * Einträge der Kalendertage fromDay bis toDay (inklusive). Ein Eintrag zählt zu dem Tag, der an seinem
+ * Erfassungsort galt (eigene Zeitzone). Abgefragt wird deshalb mit Puffer, gefiltert erst danach:
+ * Zeitzonen liegen höchstens 26 Stunden auseinander.
+ */
+export async function entriesForDays(userId: string, fromDay: string, toDay: string, tz: string) {
+  const margin = 26 * 3_600_000;
+  const rows = await entriesBetween(
+    userId,
+    new Date(startOfDay(fromDay, tz).getTime() - margin),
+    new Date(startOfDay(addDays(toDay, 1), tz).getTime() + margin),
+  );
+  return rows.filter((r) => {
+    const day = dayKey(r.consumedAt, r.timezone || tz);
+    return day >= fromDay && day <= toDay;
+  });
+}
+
+/** Einträge eines Kalendertags (Ortszeit des jeweiligen Eintrags). */
 export async function entriesForDay(user: CurrentUser, day: string) {
-  const rows = await entriesBetween(user.id, startOfDay(day, user.timezone), startOfDay(addDays(day, 1), user.timezone));
+  const rows = await entriesForDays(user.id, day, day, user.timezone);
   return rows.map((r) => toEntryDTO(r, user.timezone));
 }
 

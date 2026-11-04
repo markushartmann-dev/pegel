@@ -13,6 +13,7 @@ export default async function ProfileSettingsPage() {
       name={user.name}
       email={user.email}
       timezone={user.timezone}
+      timezoneAuto={user.timezoneAuto}
       profile={
         profile
           ? {

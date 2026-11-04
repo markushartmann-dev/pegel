@@ -15,6 +15,8 @@ import {
   startOfIsoWeek,
   toLocalDateTimeInput,
   tzOffsetMs,
+  timeZoneCity,
+  timeZoneOptions,
 } from "@/lib/dates";
 
 const BERLIN = "Europe/Berlin";
@@ -25,6 +27,14 @@ describe("Zeitzonen", () => {
     expect(isValidTimeZone("America/New_York")).toBe(true);
     expect(isValidTimeZone("Mars/Olympus")).toBe(false);
     expect(isValidTimeZone("")).toBe(false);
+  });
+
+  it("Anzeigename und Auswahlliste", () => {
+    expect(timeZoneCity("Europe/London")).toBe("London");
+    expect(timeZoneCity("America/New_York")).toBe("New York");
+    expect(timeZoneCity("UTC")).toBe("UTC");
+    expect(timeZoneOptions("Etc/Testzone")[0]).toBe("Etc/Testzone");
+    expect(timeZoneOptions()).toContain("Europe/Berlin");
   });
 
   it("Offset Berlin Winter/Sommer", () => {

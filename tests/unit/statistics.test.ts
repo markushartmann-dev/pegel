@@ -39,6 +39,14 @@ describe("Tagesaggregation", () => {
     expect(byDay[3].grams).toBe(0);
   });
 
+  it("ein Eintrag mit eigener Zeitzone zählt zum Tag seiner Ortszeit", () => {
+    // 22:30 UTC: in London 23:30 am 12.10., in Berlin schon 00:30 am 13.10.
+    const trip = { ...e("2026-10-12T22:30:00Z", 10), timezone: "Europe/London" };
+    const byDay = aggregateByDay([trip], days, tz);
+    expect(byDay[0].drinks).toBe(1);
+    expect(byDay[1].drinks).toBe(0);
+  });
+
   it("Summen und Durchschnitte", () => {
     const t = totals(aggregateByDay(entries, days, tz));
     expect(t.grams).toBe(74.18);

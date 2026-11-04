@@ -3,11 +3,11 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
-import { Alert, Button, Field, Input, Textarea } from "@/components/ui";
+import { Alert, Button, Field, Input, Select, Textarea } from "@/components/ui";
 import { ConfirmDialog, Dialog, useToast } from "@/components/ui/client";
 import { api, ApiError } from "@/lib/api-client";
 import { alcoholGrams } from "@/lib/calculations/alcohol";
-import { formatDateTime, formatTime, toLocalDateTimeInput } from "@/lib/dates";
+import { formatDateTime, formatTime, parseLocalDateTime, timeZoneCity, timeZoneOptions, toLocalDateTimeInput } from "@/lib/dates";
 import { formatNumber } from "@/i18n";
 import type { EntryDTO } from "@/server/services/entries";
 import { BeverageIcon } from "./log-form";
@@ -48,7 +48,8 @@ export function EntryList({ entries, timezone, showDate = true }: { entries: Ent
                 {e.beverageName}
               </p>
               <p className="truncate text-xs text-fg-muted tabular">
-                {showDate ? formatDateTime(new Date(e.consumedAt), timezone) : `${formatTime(new Date(e.consumedAt), timezone)} Uhr`} · {e.volumeMl} ml ·{" "}
+                {showDate ? formatDateTime(new Date(e.consumedAt), e.timezone) : `${formatTime(new Date(e.consumedAt), e.timezone)} Uhr`}
+                {e.timezone !== timezone && ` (${timeZoneCity(e.timezone)})`} · {e.volumeMl} ml ·{" "}
                 {formatNumber(e.abv, 1)} %{e.note ? ` · ${e.note}` : ""}
               </p>
             </div>
@@ -64,26 +65,27 @@ export function EntryList({ entries, timezone, showDate = true }: { entries: Ent
           </li>
         ))}
       </ul>
-      {editing && <EditEntryDialog entry={editing} timezone={timezone} onClose={() => setEditing(null)} />}
+      {editing && <EditEntryDialog entry={editing} onClose={() => setEditing(null)} />}
       <ConfirmDialog
         open={!!deleting}
         onClose={() => setDeleting(null)}
         onConfirm={remove}
         loading={busy}
         title="Eintrag löschen?"
-        description={deleting ? `${deleting.servings}× ${deleting.beverageName} vom ${formatDateTime(new Date(deleting.consumedAt), timezone)} wird dauerhaft entfernt.` : undefined}
+        description={deleting ? `${deleting.servings}× ${deleting.beverageName} vom ${formatDateTime(new Date(deleting.consumedAt), deleting.timezone)} wird dauerhaft entfernt.` : undefined}
       />
     </>
   );
 }
 
-function EditEntryDialog({ entry, timezone, onClose }: { entry: EntryDTO; timezone: string; onClose: () => void }) {
+function EditEntryDialog({ entry, onClose }: { entry: EntryDTO; onClose: () => void }) {
   const router = useRouter();
   const toast = useToast();
   const [servings, setServings] = useState(String(entry.servings));
   const [volume, setVolume] = useState(String(entry.volumeMl));
   const [abv, setAbv] = useState(String(entry.abv).replace(".", ","));
-  const [time, setTime] = useState(toLocalDateTimeInput(new Date(entry.consumedAt), timezone));
+  const [timezone, setTimezone] = useState(entry.timezone);
+  const [time, setTime] = useState(toLocalDateTimeInput(new Date(entry.consumedAt), entry.timezone));
   const [note, setNote] = useState(entry.note ?? "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -138,8 +140,25 @@ function EditEntryDialog({ entry, timezone, onClose }: { entry: EntryDTO; timezo
             <Input id="e-abv" inputMode="decimal" value={abv} onChange={(e) => setAbv(e.target.value)} />
           </Field>
         </div>
-        <Field label="Zeitpunkt" htmlFor="e-time" error={fields.consumedAtLocal}>
+        <Field label="Zeitpunkt (Ortszeit)" htmlFor="e-time" error={fields.consumedAtLocal}>
           <Input id="e-time" type="datetime-local" value={time} onChange={(e) => setTime(e.target.value)} />
+        </Field>
+        <Field label="Zeitzone" htmlFor="e-tz" hint="Beim Wechsel bleibt der tatsächliche Zeitpunkt gleich, nur die Ortszeit wird umgerechnet. Danach kannst du sie anpassen.">
+          <Select
+            id="e-tz"
+            value={timezone}
+            onChange={(e) => {
+              const parsed = parseLocalDateTime(time, timezone);
+              if (parsed) setTime(toLocalDateTimeInput(parsed, e.target.value));
+              setTimezone(e.target.value);
+            }}
+          >
+            {timeZoneOptions(timezone).map((z) => (
+              <option key={z} value={z}>
+                {z}
+              </option>
+            ))}
+          </Select>
         </Field>
         <Field label="Notiz" htmlFor="e-note" error={fields.note}>
           <Textarea id="e-note" value={note} onChange={(e) => setNote(e.target.value)} maxLength={300} />

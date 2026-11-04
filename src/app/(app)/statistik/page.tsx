@@ -35,7 +35,7 @@ export default async function StatisticsPage({ searchParams }: { searchParams: P
 
   return (
     <>
-      <PageHeader title="Statistik" description={`${formatDayKey(stats.range.fromDay)} – ${formatDayKey(stats.range.toDay)} · Tagesgrenzen in ${user.timezone}`} />
+      <PageHeader title="Statistik" description={`${formatDayKey(stats.range.fromDay)} – ${formatDayKey(stats.range.toDay)} · Einträge zählen zum Tag ihrer Ortszeit`} />
       <div className="mb-6 flex flex-col gap-3">
         <SegmentedLinks
           label="Zeitraum"

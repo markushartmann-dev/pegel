@@ -1,6 +1,6 @@
 # Pegel – Alkohol-Tagebuch
 
-![Next.js 16](https://img.shields.io/badge/Next.js-16-black?logo=nextdotjs) ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript&logoColor=white) ![PostgreSQL 17](https://img.shields.io/badge/PostgreSQL-17-4169e1?logo=postgresql&logoColor=white) ![Prisma 7](https://img.shields.io/badge/Prisma-7-2d3748?logo=prisma) ![Docker](https://img.shields.io/badge/Docker-Compose-2496ed?logo=docker&logoColor=white) ![PWA](https://img.shields.io/badge/PWA-installierbar-5a0fc8) ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg) [![Version](https://img.shields.io/badge/Version-1.2.0-informational)](CHANGELOG.md)
+![Next.js 16](https://img.shields.io/badge/Next.js-16-black?logo=nextdotjs) ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript&logoColor=white) ![PostgreSQL 17](https://img.shields.io/badge/PostgreSQL-17-4169e1?logo=postgresql&logoColor=white) ![Prisma 7](https://img.shields.io/badge/Prisma-7-2d3748?logo=prisma) ![Docker](https://img.shields.io/badge/Docker-Compose-2496ed?logo=docker&logoColor=white) ![PWA](https://img.shields.io/badge/PWA-installierbar-5a0fc8) ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg) [![Version](https://img.shields.io/badge/Version-1.3.0-informational)](CHANGELOG.md)
 
 > *Self-hosted alcohol diary (German UI): log drinks, statistics, calendar, a transparent Widmark-based BAC **estimate**, a savings jar for alcohol-free days, community ranking, admin area, PWA with push. Runs with `docker compose up -d --build`.*
 
