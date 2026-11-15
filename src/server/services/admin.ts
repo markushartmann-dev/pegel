@@ -17,7 +17,13 @@ export async function listUsers(raw: unknown) {
     ...(q.status ? { status: q.status } : {}),
     ...(q.role ? { role: q.role } : {}),
     ...(q.q
-      ? { OR: [{ email: { contains: q.q, mode: "insensitive" } }, { name: { contains: q.q, mode: "insensitive" } }] }
+      ? {
+          OR: [
+            { email: { contains: q.q, mode: "insensitive" } },
+            { name: { contains: q.q, mode: "insensitive" } },
+            { communityPseudonym: { contains: q.q, mode: "insensitive" } },
+          ],
+        }
       : {}),
   };
   const [total, users] = await Promise.all([
@@ -39,6 +45,9 @@ export async function listUsers(raw: unknown) {
         lastActiveAt: true,
         lastLogoutAt: true,
         profileUpdatedAt: true,
+        communityOptIn: true,
+        communityDisplay: true,
+        communityPseudonym: true,
         _count: { select: { entries: true, sessions: true } },
       },
     }),
@@ -68,6 +77,8 @@ export async function userDetail(id: string) {
       profileUpdatedAt: true,
       onboardingCompleted: true,
       communityOptIn: true,
+      communityDisplay: true,
+      communityPseudonym: true,
       notificationsEnabled: true,
       sessions: { select: { id: true, createdAt: true, updatedAt: true, expiresAt: true, userAgent: true }, orderBy: { updatedAt: "desc" } },
       _count: { select: { entries: true, beverages: true, pushSubscriptions: true } },

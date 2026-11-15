@@ -45,7 +45,7 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
         </div>
         <form method="get" className="mb-4 grid gap-3 sm:grid-cols-4 sm:items-end">
           <Field label="Suche" htmlFor="q">
-            <Input id="q" name="q" defaultValue={query.q} placeholder="Name oder E-Mail" />
+            <Input id="q" name="q" defaultValue={query.q} placeholder="Name, E-Mail oder Pseudonym" />
           </Field>
           <Field label="Status" htmlFor="status">
             <Select id="status" name="status" defaultValue={query.status ?? ""}>
@@ -82,6 +82,7 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
                 {u.role === "ADMIN" && <Badge tone="primary">Admin</Badge>}
               </div>
               <p className="text-xs text-fg-muted break-all">{u.email}</p>
+              <PseudonymHint user={u} />
               <dl className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
                 <div><dt className="text-fg-muted">Registriert</dt><dd className="tabular">{dt(u.createdAt)}</dd></div>
                 <div><dt className="text-fg-muted">Letzter Login</dt><dd className="tabular">{dt(u.lastLoginAt)}</dd></div>
@@ -114,6 +115,7 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
                       {u.name}
                     </Link>
                     <div className="text-xs text-fg-muted break-all">{u.email}</div>
+                    <PseudonymHint user={u} />
                   </td>
                   <td className="px-2 py-2.5">
                     <div className="flex flex-wrap gap-1">
@@ -136,5 +138,17 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
         <Pagination page={data.page} pages={data.pages} hrefFor={hrefFor} />
       </Card>
     </div>
+  );
+}
+
+/** Community-Pseudonym unter dem Namen; „nicht genutzt“, wenn der Anzeigename statt des Pseudonyms erscheint. */
+function PseudonymHint({ user }: { user: { communityPseudonym: string | null; communityDisplay: string; communityOptIn: boolean } }) {
+  if (!user.communityPseudonym) return null;
+  const used = user.communityDisplay === "PSEUDONYM" && user.communityOptIn;
+  return (
+    <p className="text-xs text-fg-muted break-words">
+      Pseudonym: <span className="font-medium text-fg">„{user.communityPseudonym}“</span>
+      {used ? "" : " (nicht genutzt)"}
+    </p>
   );
 }

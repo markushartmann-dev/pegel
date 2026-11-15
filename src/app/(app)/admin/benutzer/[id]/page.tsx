@@ -29,6 +29,14 @@ export default async function AdminUserPage({ params }: { params: Promise<{ id: 
     ["Zeitzone", user.timezone],
     ["Einrichtung abgeschlossen", user.onboardingCompleted ? "ja" : "nein"],
     ["Community-Teilnahme", user.communityOptIn ? "ja" : "nein"],
+    [
+      "Community-Anzeige",
+      user.communityDisplay === "PSEUDONYM"
+        ? user.communityPseudonym
+          ? `Pseudonym „${user.communityPseudonym}“`
+          : "Pseudonym (nicht gesetzt)"
+        : `Anzeigename${user.communityPseudonym ? ` (hinterlegtes Pseudonym: „${user.communityPseudonym}“)` : ""}`,
+    ],
     ["Push", user.notificationsEnabled ? `aktiv (${user._count.pushSubscriptions} Gerät/e)` : "aus"],
   ];
   return (

@@ -43,6 +43,16 @@ describe("Administration", () => {
     expect(users[0]._count.entries).toBe(0);
   });
 
+  it("Benutzerübersicht zeigt das Community-Pseudonym und findet es per Suche", async () => {
+    const admin = await onboardedUser();
+    const user = await onboardedUser();
+    await call(communitySettings.PUT, { method: "PUT", cookie: user.cookie, body: { optIn: true, display: "PSEUDONYM", pseudonym: "Agathe" } });
+    const r = await call(adminUsers.GET, { cookie: admin.cookie, query: { q: "agath" } });
+    const users = r.json.users as { id: string; communityPseudonym: string | null; communityDisplay: string }[];
+    expect(users.map((u) => u.id)).toEqual([user.id]);
+    expect(users[0]).toMatchObject({ communityPseudonym: "Agathe", communityDisplay: "PSEUDONYM" });
+  });
+
   it("deaktivieren beendet Sitzungen; letzter Admin ist geschützt; Rollen änderbar", async () => {
     const admin = await onboardedUser();
     const user = await onboardedUser();
