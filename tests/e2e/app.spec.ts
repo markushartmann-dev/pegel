@@ -134,14 +134,14 @@ test("8. Administrator sieht Benutzerübersicht und Aktivitätsprotokoll", async
   await login(page, admin.email);
   await page.goto("/admin");
   await expect(page.getByRole("link", { name: "Anna" })).toBeVisible();
-  await expect(page.getByText(anna.email)).toBeVisible();
+  await expect(page.getByText(anna.email).filter({ visible: true })).toBeVisible();
   await page.getByRole("link", { name: "Anna" }).click();
   await expect(page.getByText("Letzter erfolgreicher Login")).toBeVisible();
   await expect(page.getByText(/Einzelne Konsumeinträge sind aus Datenschutzgründen nicht einsehbar/)).toBeVisible();
   await page.goto("/admin/protokoll");
-  await expect(page.getByText("Registrierung").first()).toBeVisible();
-  await expect(page.getByText("Unberechtigter Zugriff").first()).toBeVisible();
-  await expect(page.getByText("Login").first()).toBeVisible();
+  await expect(page.getByText("Registrierung").filter({ visible: true }).first()).toBeVisible();
+  await expect(page.getByText("Unberechtigter Zugriff").filter({ visible: true }).first()).toBeVisible();
+  await expect(page.getByText("Login").filter({ visible: true }).first()).toBeVisible();
 });
 
 test("Administrator legt einen Benutzer mit Startpasswort an", async ({ page, browser }) => {
@@ -234,4 +234,17 @@ test("Sicherheits-Header und kein Caching privater API-Antworten", async ({ page
   const cache = await page.evaluate(async () => (await fetch("/api/v1/me")).headers.get("cache-control"));
   expect(cache).toContain("no-store");
   expect(PASSWORD.length).toBeGreaterThan(9);
+});
+
+test("Auf dem Handy passt jede Seite ohne seitliches Scrollen; Neuigkeiten behalten den Weg zurück", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await login(page, admin.email);
+  for (const path of ["/dashboard", "/getraenke", "/statistik", "/community", "/einstellungen", "/admin", "/admin/protokoll", "/admin/vorschlaege"]) {
+    await page.goto(path);
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    expect(overflow, path).toBeLessThanOrEqual(0);
+  }
+  await page.goto("/neuigkeiten");
+  await page.mouse.wheel(0, 3000);
+  await expect(page.getByRole("link", { name: "Zur App" })).toBeInViewport();
 });

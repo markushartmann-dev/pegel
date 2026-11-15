@@ -120,6 +120,7 @@ model User {
   profile           UserProfile?
   profileRevisions  UserProfileRevision[]
   beverages         Beverage[]
+  suggestedBeverages Beverage[] @relation("BeverageSuggestions")
   entries           ConsumptionEntry[]
   pushSubscriptions PushSubscription[]
   notifications     UserNotification[]
@@ -238,6 +239,12 @@ model Beverage {
   isDefault     Boolean          @default(false)
   isActive      Boolean          @default(true)
   isFavorite    Boolean          @default(false)
+  suggestionStatus SuggestionStatus @default(NONE)
+  suggestedAt      DateTime?        @db.Timestamptz(3)
+  suggestedById    String?
+  suggestedBy      User?            @relation("BeverageSuggestions", fields: [suggestedById], references: [id], onDelete: SetNull)
+  suggestionNote   String?
+  reviewedAt       DateTime?        @db.Timestamptz(3)
   sortOrder     Int              @default(0)
   createdAt     DateTime         @default(now()) @db.Timestamptz(3)
   updatedAt     DateTime         @updatedAt @db.Timestamptz(3)
@@ -246,6 +253,7 @@ model Beverage {
   @@unique([ownerId, name])
   @@index([ownerId, isActive])
   @@index([isDefault, isActive])
+  @@index([suggestionStatus])
   @@map("beverage")
 }
 
@@ -354,4 +362,11 @@ model AuditLog {
   @@index([action, createdAt])
   @@index([severity, createdAt])
   @@map("audit_log")
+}
+
+enum SuggestionStatus {
+  NONE
+  PENDING
+  REJECTED
+  APPROVED
 }

@@ -3,7 +3,7 @@ import { prisma } from "../db";
 import { env } from "../env";
 import { addDays, dayKey, startOfDay } from "@/lib/dates";
 import { computeSavings, savingsBetween, type SavingsResult } from "@/lib/savings";
-import type { CommunityPeriod } from "./community";
+import { communityParticipantWhere, type CommunityPeriod } from "./community";
 
 interface SavingsUser {
   id: string;
@@ -60,7 +60,7 @@ export async function userSavings(user: SavingsUser, now = new Date()): Promise<
  */
 export async function savingsRanking(period: CommunityPeriod, viewerId: string, now = new Date()) {
   const users = await prisma.user.findMany({
-    where: { communityOptIn: true, status: "ACTIVE", onboardingCompleted: true },
+    where: { ...communityParticipantWhere(now), onboardingCompleted: true },
     select: { id: true, name: true, timezone: true, createdAt: true, communityDisplay: true, communityPseudonym: true },
   });
   const rows = await Promise.all(

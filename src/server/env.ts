@@ -55,6 +55,8 @@ export const env = {
     absorptionMinutes: num("MODEL_ABSORPTION_MINUTES", 30, 0, 180),
   },
   /** Sparschwein: Euro pro Tag ohne Eintrag, Bonus pro voller Woche am Stück, Bonus pro komplettem Monat */
+  /** Teilnehmende ohne Anmeldung/Aktivität seit so vielen Tagen werden in der Community ausgeblendet. */
+  communityInactiveDays: num("COMMUNITY_INACTIVE_DAYS", 10, 1, 365),
   savings: {
     perDay: num("SAVINGS_PER_DAY", 5, 0, 1000),
     weekBonus: num("SAVINGS_WEEK_BONUS", 10, 0, 1000),

@@ -3,13 +3,13 @@ import Link from "next/link";
 import { Flame, PiggyBank, Users } from "lucide-react";
 import { requireOnboardedUser } from "@/server/page-auth";
 import { prisma } from "@/server/db";
-import { communityRanking, COMMUNITY_PERIODS, type CommunityPeriod } from "@/server/services/community";
+import { communityRanking, COMMUNITY_PERIODS, inactiveHiddenCount, type CommunityPeriod } from "@/server/services/community";
 import { savingsRanking, userSavings } from "@/server/services/savings";
 import { SavingsCard } from "@/features/savings/savings-card";
 import { Alert, Badge, Card, CardHeader, EmptyState, PageHeader, SegmentedLinks } from "@/components/ui";
 import { RankingBarChart, ShareDonut } from "@/components/charts";
 import { CommunitySettings } from "@/features/community/community-settings";
-import { formatEuro, formatGrams, formatNumber } from "@/i18n";
+import { countLabel, formatEuro, formatGrams, formatNumber } from "@/i18n";
 
 export const metadata: Metadata = { title: "Community" };
 
@@ -19,11 +19,12 @@ export default async function CommunityPage({ searchParams }: { searchParams: Pr
   const user = await requireOnboardedUser();
   const { zeitraum } = await searchParams;
   const period: CommunityPeriod = (COMMUNITY_PERIODS as readonly string[]).includes(zeitraum ?? "") ? (zeitraum as CommunityPeriod) : "week";
-  const [settings, ranking, savingsTop, ownSavings] = await Promise.all([
+  const [settings, ranking, savingsTop, ownSavings, inactive] = await Promise.all([
     prisma.user.findUniqueOrThrow({ where: { id: user.id }, select: { communityOptIn: true, communityDisplay: true, communityPseudonym: true } }),
     communityRanking(period, user.id),
     savingsRanking(period, user.id),
     userSavings(user),
+    inactiveHiddenCount(),
   ]);
   const pie = [...ranking.top.map((r) => ({ name: r.label, value: r.grams })), ...(ranking.rest ? [{ name: `Weitere (${ranking.rest.count})`, value: ranking.rest.grams }] : [])];
 
@@ -33,7 +34,8 @@ export default async function CommunityPage({ searchParams }: { searchParams: Pr
       <Alert tone="info" className="mb-6">
         Die Statistik ist nur für angemeldete Benutzer dieser Installation sichtbar und wird nicht veröffentlicht. Sie zeigt ausschließlich erfasste
         Mengen – nicht den tatsächlichen Alkoholkonsum. Teilnehmende ohne Einträge im Zeitraum erscheinen nicht; gelöschte Konten und widerrufene
-        Teilnahmen werden sofort entfernt.
+        Teilnahmen werden sofort entfernt. Wer seit {inactive.days} Tagen nicht in der App war, wird ausgeblendet und erscheint mit der nächsten
+        Anmeldung wieder{inactive.hidden > 0 ? ` (derzeit ${countLabel(inactive.hidden, "Person", "Personen")})` : ""}.
       </Alert>
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="flex flex-col gap-6 lg:col-span-2">
@@ -62,7 +64,7 @@ export default async function CommunityPage({ searchParams }: { searchParams: Pr
                   {savingsTop.top.map((r) => (
                     <li key={r.rank} className="flex items-center gap-3 py-2.5">
                       <span className="w-6 text-right text-sm font-semibold text-fg-muted tabular">{r.rank}.</span>
-                      <span className="flex-1 truncate text-sm">
+                      <span className="min-w-0 flex-1 text-sm break-words">
                         {r.label} {r.isViewer && <Badge tone="primary">du</Badge>}
                       </span>
                       {r.streak > 0 && (
@@ -106,7 +108,7 @@ export default async function CommunityPage({ searchParams }: { searchParams: Pr
                   {ranking.top.map((r) => (
                     <li key={r.rank} className="flex items-center gap-3 py-2.5">
                       <span className="w-6 text-right text-sm font-semibold text-fg-muted tabular">{r.rank}.</span>
-                      <span className="flex-1 truncate text-sm">
+                      <span className="min-w-0 flex-1 text-sm break-words">
                         {r.label} {r.isViewer && <Badge tone="primary">du</Badge>}
                       </span>
                       <span className="text-sm tabular text-fg-muted">{formatNumber(r.share * 100, 0)} %</span>

@@ -4,6 +4,31 @@ import { audit } from "../audit";
 import { rankingWithShares } from "@/lib/statistics";
 import { communitySchema } from "@/lib/validation";
 import { CONSENT_VERSION } from "./profile";
+import { env } from "../env";
+import type { Prisma } from "@/generated/prisma/client";
+
+/**
+ * Teilnehmende der Community: Einwilligung, aktives Konto und in den letzten
+ * COMMUNITY_INACTIVE_DAYS Tagen angemeldet oder aktiv. Wer länger weg ist, wird
+ * ausgeblendet und taucht mit der nächsten Anmeldung automatisch wieder auf.
+ */
+export function communityParticipantWhere(now = new Date()): Prisma.UserWhereInput {
+  const cutoff = new Date(now.getTime() - env.communityInactiveDays * 86_400_000);
+  return {
+    communityOptIn: true,
+    status: "ACTIVE",
+    OR: [{ lastActiveAt: { gte: cutoff } }, { lastLoginAt: { gte: cutoff } }],
+  };
+}
+
+/** Anzahl eingewilligter Konten, die wegen Inaktivität gerade ausgeblendet sind. */
+export async function inactiveHiddenCount(now = new Date()) {
+  const [all, active] = await Promise.all([
+    prisma.user.count({ where: { communityOptIn: true, status: "ACTIVE" } }),
+    prisma.user.count({ where: communityParticipantWhere(now) }),
+  ]);
+  return { hidden: all - active, days: env.communityInactiveDays };
+}
 
 export const COMMUNITY_PERIODS = ["week", "month", "all"] as const;
 export type CommunityPeriod = (typeof COMMUNITY_PERIODS)[number];
@@ -12,7 +37,8 @@ export type CommunityPeriod = (typeof COMMUNITY_PERIODS)[number];
  * App-interne Community-Statistik (nur für angemeldete Benutzer sichtbar, keine Veröffentlichung im Internet).
  *
  * Definitionen:
- *  - Teilnehmer: aktive Konten mit ausdrücklicher Einwilligung (communityOptIn = true).
+ *  - Teilnehmer: aktive Konten mit ausdrücklicher Einwilligung (communityOptIn = true),
+ *    die in den letzten COMMUNITY_INACTIVE_DAYS Tagen (Standard 10) aktiv waren.
  *  - "Woche" = letzte 7 × 24 h, "Monat" = letzte 30 × 24 h, "Gesamt" = alle erfassten Einträge.
  *  - Gelöschte Konten: Einträge werden mit dem Konto gelöscht und erscheinen nicht mehr.
  *  - Widerruf der Teilnahme wirkt sofort (Werte werden bei jedem Aufruf neu berechnet).
@@ -30,7 +56,7 @@ export async function communityRanking(period: CommunityPeriod, viewerId: string
   const grouped = await prisma.consumptionEntry.groupBy({
     by: ["userId"],
     where: {
-      user: { communityOptIn: true, status: "ACTIVE" },
+      user: communityParticipantWhere(now),
       ...(since ? { consumedAt: { gte: since, lte: now } } : { consumedAt: { lte: now } }),
     },
     _sum: { alcoholGrams: true },
@@ -46,7 +72,7 @@ export async function communityRanking(period: CommunityPeriod, viewerId: string
     return { userId: g.userId, label, grams: Number(g._sum.alcoholGrams ?? 0) };
   });
   const ranking = rankingWithShares(rows, 10);
-  const participants = await prisma.user.count({ where: { communityOptIn: true, status: "ACTIVE" } });
+  const participants = await prisma.user.count({ where: communityParticipantWhere(now) });
   return {
     period,
     participantsTotal: participants,

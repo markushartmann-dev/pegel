@@ -71,12 +71,32 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
           </div>
         </form>
 
-        <div className="-mx-4 overflow-x-auto sm:mx-0">
-          <table className="w-full min-w-[900px] text-sm">
+        <ul className="divide-y divide-border lg:hidden">
+          {data.users.map((u) => (
+            <li key={u.id} className="flex flex-col gap-1.5 py-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <Link href={`/admin/benutzer/${u.id}`} className="font-medium text-primary break-words hover:underline">
+                  {u.name}
+                </Link>
+                <Badge tone={u.status === "ACTIVE" ? "success" : "danger"}>{u.status === "ACTIVE" ? "aktiv" : "deaktiviert"}</Badge>
+                {u.role === "ADMIN" && <Badge tone="primary">Admin</Badge>}
+              </div>
+              <p className="text-xs text-fg-muted break-all">{u.email}</p>
+              <dl className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
+                <div><dt className="text-fg-muted">Registriert</dt><dd className="tabular">{dt(u.createdAt)}</dd></div>
+                <div><dt className="text-fg-muted">Letzter Login</dt><dd className="tabular">{dt(u.lastLoginAt)}</dd></div>
+                <div><dt className="text-fg-muted">Letzte Aktivität</dt><dd className="tabular">{dt(u.lastActiveAt)}</dd></div>
+                <div><dt className="text-fg-muted">Einträge</dt><dd className="tabular">{u._count.entries}</dd></div>
+              </dl>
+            </li>
+          ))}
+        </ul>
+        <div className="hidden lg:block">
+          <table className="w-full text-sm">
             <caption className="sr-only">Benutzerübersicht</caption>
             <thead className="text-left text-xs text-fg-muted">
               <tr className="border-b border-border">
-                <th className="px-4 py-2 font-medium sm:px-2">Benutzer</th>
+                <th className="px-2 py-2 font-medium">Benutzer</th>
                 <th className="px-2 py-2 font-medium">Status / Rolle</th>
                 <th className="px-2 py-2 font-medium">Registriert</th>
                 <th className="px-2 py-2 font-medium">Letzter Login</th>
@@ -89,11 +109,11 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
             <tbody className="divide-y divide-border">
               {data.users.map((u) => (
                 <tr key={u.id} className="hover:bg-muted/50">
-                  <td className="px-4 py-2.5 sm:px-2">
+                  <td className="px-2 py-2.5">
                     <Link href={`/admin/benutzer/${u.id}`} className="font-medium text-primary hover:underline">
                       {u.name}
                     </Link>
-                    <div className="text-xs text-fg-muted">{u.email}</div>
+                    <div className="text-xs text-fg-muted break-all">{u.email}</div>
                   </td>
                   <td className="px-2 py-2.5">
                     <div className="flex flex-wrap gap-1">

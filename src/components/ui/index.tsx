@@ -214,15 +214,15 @@ export function Skeleton({ className }: { className?: string }) {
 /** Segmentierte Auswahl als Links (funktioniert ohne JavaScript). */
 export function SegmentedLinks({ items, active, label }: { items: { href: string; label: string; value: string }[]; active: string; label: string }) {
   return (
-    <nav aria-label={label} className="-mx-1 overflow-x-auto px-1 [scrollbar-width:none]">
-      <ul className="inline-flex min-w-max gap-1 rounded-[var(--radius-sm)] border border-border bg-card p-1">
+    <nav aria-label={label} className="max-w-full">
+      <ul className="inline-flex max-w-full flex-wrap gap-1 rounded-[var(--radius-sm)] border border-border bg-card p-1">
         {items.map((it) => (
           <li key={it.value}>
             <Link
               href={it.href}
               aria-current={it.value === active ? "page" : undefined}
               className={cn(
-                "inline-flex h-8 items-center rounded-md px-3 text-sm whitespace-nowrap transition-colors",
+                "inline-flex min-h-8 items-center rounded-md px-3 py-1 text-sm transition-colors",
                 it.value === active ? "bg-primary text-primary-fg" : "text-fg-muted hover:bg-muted hover:text-fg",
               )}
             >

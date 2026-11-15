@@ -82,7 +82,7 @@ export default async function AdminUserPage({ params }: { params: Promise<{ id: 
                 <span className="text-xs text-fg-muted">
                   seit {dt(s.createdAt)} · zuletzt {dt(s.updatedAt)} · gültig bis {dt(s.expiresAt)}
                 </span>
-                <div className="truncate text-xs">{s.userAgent ?? "unbekannt"}</div>
+                <div className="text-xs break-all">{s.userAgent ?? "unbekannt"}</div>
               </li>
             ))}
             {user.sessions.length === 0 && <li className="py-2 text-fg-muted">Keine aktiven Sitzungen.</li>}

@@ -21,6 +21,9 @@ export interface BeverageDTO {
   isActive: boolean;
   isFavorite: boolean;
   own: boolean;
+  /** Vorschlag als Standardgetränk (nur bei eigenen Getränken relevant) */
+  suggestionStatus: "NONE" | "PENDING" | "REJECTED" | "APPROVED";
+  suggestionNote: string | null;
 }
 
 type BeverageRow = Prisma.BeverageGetPayload<object>;
@@ -39,6 +42,8 @@ export function toBeverageDTO(b: BeverageRow, userId: string): BeverageDTO {
     isActive: b.isActive,
     isFavorite: b.isFavorite,
     own: b.ownerId === userId,
+    suggestionStatus: b.suggestionStatus,
+    suggestionNote: b.ownerId === userId ? b.suggestionNote : null,
   };
 }
 
@@ -104,6 +109,8 @@ export async function updateBeverage(user: CurrentUser, id: string, raw: unknown
         category: input.category ?? undefined,
         isFavorite: input.isFavorite ?? undefined,
         isActive: input.isActive ?? undefined,
+        // Archivieren zieht einen offenen Vorschlag zurück.
+        ...(input.isActive === false && b.suggestionStatus === "PENDING" ? { suggestionStatus: "NONE" as const, suggestedAt: null } : {}),
         volumeMl,
         abv,
         alcoholGrams: roundGrams(alcoholGrams(volumeMl, abv)),

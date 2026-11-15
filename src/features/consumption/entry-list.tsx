@@ -43,11 +43,11 @@ export function EntryList({ entries, timezone, showDate = true }: { entries: Ent
               <BeverageIcon category={e.category} className="size-4" />
             </span>
             <div className="min-w-[9rem] flex-1">
-              <p className="truncate text-sm font-medium">
+              <p className="text-sm font-medium break-words">
                 {e.servings > 1 && <span className="tabular">{e.servings}× </span>}
                 {e.beverageName}
               </p>
-              <p className="truncate text-xs text-fg-muted tabular">
+              <p className="text-xs text-fg-muted tabular break-words">
                 {showDate ? formatDateTime(new Date(e.consumedAt), e.timezone) : `${formatTime(new Date(e.consumedAt), e.timezone)} Uhr`}
                 {e.timezone !== timezone && ` (${timeZoneCity(e.timezone)})`} · {e.volumeMl} ml ·{" "}
                 {formatNumber(e.abv, 1)} %{e.note ? ` · ${e.note}` : ""}

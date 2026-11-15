@@ -120,7 +120,16 @@
   html {
     -webkit-text-size-adjust: 100%;
   }
+  /* Nie seitlich scrollen: Grid-Kinder dürfen schrumpfen, lange Wörter brechen um. */
+  html,
   body {
+    overflow-x: clip;
+  }
+  .grid > * {
+    min-width: 0;
+  }
+  body {
+    overflow-wrap: break-word;
     background: var(--bg);
     color: var(--fg);
     font-family: var(--font-sans);

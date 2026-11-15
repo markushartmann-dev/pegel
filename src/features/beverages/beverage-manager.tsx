@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Archive, ArchiveRestore, Pencil, Plus, Star } from "lucide-react";
+import { Archive, ArchiveRestore, Megaphone, Pencil, Plus, Star, Undo2 } from "lucide-react";
 import { Alert, Badge, Button, Card, CardHeader, EmptyState, Field, Input, Select, cn } from "@/components/ui";
 import { ConfirmDialog, Dialog, useToast } from "@/components/ui/client";
 import { api, ApiError } from "@/lib/api-client";
@@ -19,6 +19,7 @@ export function BeverageManager({ beverages, isAdmin }: { beverages: BeverageDTO
   const toast = useToast();
   const [form, setForm] = useState<FormState | null>(null);
   const [archiving, setArchiving] = useState<BeverageDTO | null>(null);
+  const [suggesting, setSuggesting] = useState<BeverageDTO | null>(null);
   const [busy, setBusy] = useState(false);
   const own = beverages.filter((b) => b.own);
   const active = own.filter((b) => b.isActive);
@@ -49,6 +50,20 @@ export function BeverageManager({ beverages, isAdmin }: { beverages: BeverageDTO
     }
   }
 
+  async function suggest(b: BeverageDTO, withdraw = false) {
+    setBusy(true);
+    try {
+      await api(`/api/v1/beverages/${b.id}/suggestion`, { method: withdraw ? "DELETE" : "POST" });
+      toast(withdraw ? "Vorschlag zurückgezogen." : `${b.name} wurde zur Freigabe vorgeschlagen.`);
+      setSuggesting(null);
+      router.refresh();
+    } catch (e) {
+      toast((e as Error).message, "error");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   const edit = (b: BeverageDTO) =>
     setForm({
       id: b.id,
@@ -61,22 +76,29 @@ export function BeverageManager({ beverages, isAdmin }: { beverages: BeverageDTO
     });
 
   const row = (b: BeverageDTO, actions: React.ReactNode) => (
-    <li key={b.id} className={cn("flex items-center gap-3 py-3", !b.isActive && "opacity-60")}>
+    <li key={b.id} className={cn("flex flex-wrap items-center gap-x-3 gap-y-1 py-3", !b.isActive && "opacity-60")}>
       <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-fg-muted">
         <BeverageIcon category={b.category} className="size-4" />
       </span>
-      <div className="min-w-0 flex-1">
-        <p className="flex items-center gap-2 truncate text-sm font-medium">
-          {b.name}
+      <div className="min-w-[9rem] flex-1">
+        <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium break-words">
+          <span className="break-words">{b.name}</span>
           {b.isFavorite && b.own && <Star className="size-3.5 fill-current text-warning" aria-label="Favorit" />}
           {!b.isActive && <Badge>Archiviert</Badge>}
+          {b.own && b.isActive && b.suggestionStatus === "PENDING" && <Badge tone="primary">Vorschlag offen</Badge>}
+          {b.own && b.isActive && b.suggestionStatus === "REJECTED" && <Badge tone="warning">Vorschlag abgelehnt</Badge>}
         </p>
-        <p className="truncate text-xs text-fg-muted tabular">
+        <p className="text-xs text-fg-muted tabular break-words">
           {t.categories[b.category]} · {b.volumeMl} ml · {formatNumber(b.abv, 1)} % vol{b.description ? ` · ${b.description}` : ""}
         </p>
+        {b.own && b.isActive && b.suggestionStatus === "REJECTED" && b.suggestionNote && (
+          <p className="mt-1 text-xs text-warning break-words">Begründung: {b.suggestionNote}</p>
+        )}
       </div>
-      <span className="shrink-0 text-sm font-semibold tabular">{formatNumber(b.alcoholGrams, 1)} g</span>
-      <div className="flex shrink-0">{actions}</div>
+      <div className="ml-auto flex shrink-0 items-center gap-1">
+        <span className="pr-1 text-sm font-semibold tabular">{formatNumber(b.alcoholGrams, 1)} g</span>
+        {actions}
+      </div>
     </li>
   );
 
@@ -85,7 +107,7 @@ export function BeverageManager({ beverages, isAdmin }: { beverages: BeverageDTO
       <Card>
         <CardHeader
           title="Meine Getränke"
-          description="Nur für dich sichtbar. Favoriten erscheinen beim Erfassen zuerst."
+          description="Nur für dich sichtbar. Favoriten erscheinen beim Erfassen zuerst. Mit dem Megafon schlägst du ein Getränk für alle vor."
           action={
             <Button size="sm" onClick={() => setForm(empty)}>
               <Plus className="size-4" aria-hidden /> Neu
@@ -104,6 +126,15 @@ export function BeverageManager({ beverages, isAdmin }: { beverages: BeverageDTO
                   <Button variant="ghost" size="icon" onClick={() => edit(b)} aria-label={`${b.name} bearbeiten`}>
                     <Pencil className="size-4" />
                   </Button>
+                  {b.suggestionStatus === "PENDING" ? (
+                    <Button variant="ghost" size="icon" onClick={() => suggest(b, true)} disabled={busy} aria-label={`Vorschlag für ${b.name} zurückziehen`} title="Vorschlag zurückziehen">
+                      <Undo2 className="size-4" />
+                    </Button>
+                  ) : (
+                    <Button variant="ghost" size="icon" onClick={() => setSuggesting(b)} aria-label={`${b.name} für alle vorschlagen`} title="Für alle vorschlagen">
+                      <Megaphone className="size-4" />
+                    </Button>
+                  )}
                   <Button variant="ghost" size="icon" onClick={() => setArchiving(b)} aria-label={`${b.name} archivieren`}>
                     <Archive className="size-4" />
                   </Button>
@@ -161,6 +192,16 @@ export function BeverageManager({ beverages, isAdmin }: { beverages: BeverageDTO
         confirmLabel="Archivieren"
         title="Getränk archivieren?"
         description="Archivierte Getränke stehen beim Erfassen nicht mehr zur Auswahl. Bestehende Einträge bleiben unverändert erhalten."
+      />
+      <ConfirmDialog
+        open={!!suggesting}
+        onClose={() => setSuggesting(null)}
+        onConfirm={async () => { if (suggesting) await suggest(suggesting); }}
+        loading={busy}
+        tone="primary"
+        confirmLabel="Vorschlagen"
+        title={suggesting ? `„${suggesting.name}“ für alle vorschlagen?` : ""}
+        description="Die Administration prüft den Vorschlag. Nach der Freigabe wird das Getränk zum Standardgetränk für alle – du kannst es dann nicht mehr selbst bearbeiten. Deine bisherigen Einträge bleiben unverändert."
       />
     </div>
   );

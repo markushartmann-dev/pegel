@@ -6,6 +6,19 @@ Alle nennenswerten Änderungen an Pegel. Format nach [Keep a Changelog](https://
 
 ## [Unveröffentlicht]
 
+## [1.5.0] – 2026-11-15
+
+### Hinzugefügt
+- **Eigene Getränke für alle vorschlagen:** Über das Megafon-Symbol unter „Getränke“ lässt sich ein eigenes Getränk als Standardgetränk vorschlagen. Offene Vorschläge sind am Getränk markiert und können zurückgezogen werden.
+- **Freigabe durch die Administration:** Neuer Bereich Administration → Vorschläge (mit Zähler). Freigegebene Getränke werden sofort für alle verfügbar, bestehende Einträge bleiben erhalten. Bei Ablehnung sieht die Person die Begründung und kann nach einer Korrektur erneut vorschlagen. Alles wird protokolliert.
+
+### Geändert
+- **Community ohne Karteileichen:** Wer seit 10 Tagen weder angemeldet noch aktiv war, wird im Mengen- und Sparschwein-Ranking ausgeblendet und erscheint mit der nächsten Anmeldung automatisch wieder. Die Frist ist über `COMMUNITY_INACTIVE_DAYS` einstellbar.
+- **Neuigkeiten, Hilfe und Rechtliches:** Die Kopfzeile mit „Zur App“ bleibt beim Scrollen stehen.
+
+### Behoben
+- **Handy-Darstellung:** Alle Seiten passen bei 100 % Zoom auf das Display, ohne seitliches Scrollen. Lange Namen und Beschreibungen brechen um, statt abgeschnitten zu werden (u. a. Getränke, Einträge, Community). Auswahlleisten brechen um, Benutzerliste und Aktivitätsprotokoll erscheinen auf dem Handy als Karten.
+
 ## [1.4.0] – 2026-11-04
 
 ### Hinzugefügt

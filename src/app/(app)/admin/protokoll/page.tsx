@@ -41,6 +41,10 @@ const ACTION_LABELS: Record<string, string> = {
   "admin.user_created": "Admin: Konto angelegt",
   "admin.reset_link_created": "Admin: Reset-Link erzeugt",
   "admin.default_beverage_changed": "Admin: Standardgetränk geändert",
+  "admin.beverage_suggestion_approved": "Admin: Getränke-Vorschlag freigegeben",
+  "admin.beverage_suggestion_rejected": "Admin: Getränke-Vorschlag abgelehnt",
+  "beverage.suggested": "Getränk für alle vorgeschlagen",
+  "beverage.suggestion_withdrawn": "Getränke-Vorschlag zurückgezogen",
   "security.csrf_blocked": "CSRF-Anfrage blockiert",
   "security.rate_limited": "Rate-Limit ausgelöst",
   "security.forbidden": "Unberechtigter Zugriff",
@@ -102,12 +106,31 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
         </div>
       </form>
       {q.userId && <p className="mb-3 text-sm text-fg-muted">Gefiltert auf einen Benutzer.</p>}
-      <div className="-mx-4 overflow-x-auto sm:mx-0">
-        <table className="w-full min-w-[820px] text-sm">
+      <ul className="divide-y divide-border md:hidden">
+        {data.items.map((e) => (
+          <li key={e.id} className="flex flex-col gap-1 py-3 text-sm">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge tone={TONE[e.severity]}>{e.severity}</Badge>
+              <span className="font-medium break-words">{ACTION_LABELS[e.action] ?? e.action}</span>
+            </div>
+            <p className="text-xs text-fg-muted tabular">
+              {formatDateTime(e.createdAt, admin.timezone)}
+              {e.ipAddress ? ` · ${e.ipAddress}` : ""}
+            </p>
+            <p className="text-xs">
+              Von {who(e.actor, !!e.actorId || e.action === "account.deleted")}
+              {e.targetUser && <> · betrifft {who(e.targetUser, false)}</>}
+            </p>
+            {e.metadata && <p className="font-mono text-[11px] text-fg-muted break-all">{JSON.stringify(e.metadata)}</p>}
+          </li>
+        ))}
+      </ul>
+      <div className="hidden md:block">
+        <table className="w-full text-sm">
           <caption className="sr-only">Aktivitätsprotokoll</caption>
           <thead className="text-left text-xs text-fg-muted">
             <tr className="border-b border-border">
-              <th className="px-4 py-2 font-medium sm:px-2">Zeitpunkt ({admin.timezone})</th>
+              <th className="px-2 py-2 font-medium">Zeitpunkt ({admin.timezone})</th>
               <th className="px-2 py-2 font-medium">Ereignis</th>
               <th className="px-2 py-2 font-medium">Ausgelöst von</th>
               <th className="px-2 py-2 font-medium">Betroffen</th>
@@ -118,14 +141,14 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
           <tbody className="divide-y divide-border">
             {data.items.map((e) => (
               <tr key={e.id}>
-                <td className="px-4 py-2 text-xs whitespace-nowrap tabular sm:px-2">{formatDateTime(e.createdAt, admin.timezone)}</td>
+                <td className="px-2 py-2 text-xs tabular">{formatDateTime(e.createdAt, admin.timezone)}</td>
                 <td className="px-2 py-2">
                   <Badge tone={TONE[e.severity]}>{e.severity}</Badge> <span className="ml-1">{ACTION_LABELS[e.action] ?? e.action}</span>
                 </td>
                 <td className="px-2 py-2 text-xs">{who(e.actor, !!e.actorId || e.action === "account.deleted")}</td>
                 <td className="px-2 py-2 text-xs">{who(e.targetUser, false)}</td>
                 <td className="px-2 py-2 text-xs text-fg-muted">{e.ipAddress ?? "–"}</td>
-                <td className="max-w-64 truncate px-2 py-2 font-mono text-[11px] text-fg-muted" title={e.metadata ? JSON.stringify(e.metadata) : undefined}>
+                <td className="max-w-64 px-2 py-2 font-mono text-[11px] break-all text-fg-muted">
                   {e.metadata ? JSON.stringify(e.metadata) : ""}
                 </td>
               </tr>
