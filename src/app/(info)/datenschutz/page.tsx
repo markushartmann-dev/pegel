@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Alert } from "@/components/ui";
 import { ImprintContact, imprintConfigured } from "@/components/imprint-contact";
+import { env } from "@/server/env";
 
 export const metadata: Metadata = { title: "Datenschutz" };
 
@@ -41,7 +42,7 @@ export default function PrivacyPage() {
         Deine Einträge sind nur für dich sichtbar. Administratoren sehen Kontodaten, Aktivitätszeitpunkte und aggregierte Zahlen (z. B. Anzahl der
         Einträge), aber keine einzelnen Konsumeinträge. Die Teilnahme am Community-Ranking ist voreingestellt; du kannst sie bei der Einrichtung und
         jederzeit unter „Community“ abwählen. Angezeigt wird ausschließlich deine Gesamtmenge unter deinem Anzeigenamen oder einem Pseudonym,
-        und nur für angemeldete Benutzer dieser Installation. Warst du 10 Tage nicht in der App, wirst du ausgeblendet, bis du dich wieder anmeldest.
+        und nur für angemeldete Benutzer dieser Installation. Warst du {env.communityInactiveDays} Tage nicht in der App, wirst du ausgeblendet, bis du dich wieder anmeldest.
       </p>
 
       <h2>5. Speicherort und Empfänger</h2>

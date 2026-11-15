@@ -44,6 +44,15 @@ async function shot(page, name, path, { full = false, before } = {}) {
   console.log(`✓ ${name}`);
 }
 
+// ─── Ein offener Getränke-Vorschlag für die Admin-Ansicht ─────────────────
+{
+  const { ctx, page } = await session("aylin@pegel.demo");
+  const { beverages } = await (await page.request.get("/api/v1/beverages")).json();
+  const own = beverages.find((b) => b.own && b.suggestionStatus === "NONE");
+  if (own) await page.request.post(`/api/v1/beverages/${own.id}/suggestion`, { headers: { origin: BASE } });
+  await ctx.close();
+}
+
 // ─── Desktop, Lena (Midnight, dunkel, Administratorin) ───────────────────
 {
   const anon = await session(null);
@@ -68,6 +77,8 @@ async function shot(page, name, path, { full = false, before } = {}) {
   await shot(page, "10-admin-benutzer", "/admin", { full: true });
   await shot(page, "11-admin-protokoll", "/admin/protokoll");
   await shot(page, "12-modell-hinweise", "/hinweise");
+  await shot(page, "17-neuigkeiten", "/neuigkeiten");
+  await shot(page, "18-admin-vorschlaege", "/admin/vorschlaege");
   await ctx.close();
 }
 
@@ -99,6 +110,8 @@ for (const [email, name, path] of [
   await shot(page, "34-mobil-menue", "/statistik", {
     before: async (p) => p.getByRole("button", { name: "Mehr" }).click(),
   });
+  await shot(page, "36-mobil-getraenke", "/getraenke");
+  await shot(page, "37-mobil-neuigkeiten", "/neuigkeiten", { before: async (p) => p.mouse.wheel(0, 900) });
   await ctx.close();
 }
 {

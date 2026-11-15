@@ -38,7 +38,7 @@ export type CommunityPeriod = (typeof COMMUNITY_PERIODS)[number];
  *
  * Definitionen:
  *  - Teilnehmer: aktive Konten mit ausdrücklicher Einwilligung (communityOptIn = true),
- *    die in den letzten COMMUNITY_INACTIVE_DAYS Tagen (Standard 10) aktiv waren.
+ *    die in den letzten COMMUNITY_INACTIVE_DAYS Tagen (Standard 7) aktiv waren.
  *  - "Woche" = letzte 7 × 24 h, "Monat" = letzte 30 × 24 h, "Gesamt" = alle erfassten Einträge.
  *  - Gelöschte Konten: Einträge werden mit dem Konto gelöscht und erscheinen nicht mehr.
  *  - Widerruf der Teilnahme wirkt sofort (Werte werden bei jedem Aufruf neu berechnet).

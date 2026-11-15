@@ -79,7 +79,7 @@ describe("Eigene Getränke für alle vorschlagen", () => {
 });
 
 describe("Community blendet Inaktive aus", () => {
-  it("wer seit über 10 Tagen nicht aktiv war, fehlt im Ranking und kommt mit Aktivität zurück", async () => {
+  it("wer seit über 7 Tagen nicht aktiv war, fehlt im Ranking und kommt mit Aktivität zurück", async () => {
     const viewer = await onboardedUser();
     const active = await onboardedUser();
     const idle = await onboardedUser();
@@ -92,7 +92,7 @@ describe("Community blendet Inaktive aus", () => {
       });
     }
     await prisma.user.updateMany({ where: { id: { in: [viewer.id, active.id, idle.id] } }, data: { communityOptIn: true } });
-    const old = new Date(Date.now() - 11 * 86_400_000);
+    const old = new Date(Date.now() - 8 * 86_400_000);
     await prisma.user.update({ where: { id: idle.id }, data: { lastActiveAt: old, lastLoginAt: old } });
 
     let r = await call(community.GET, { cookie: viewer.cookie, query: { period: "week" } });

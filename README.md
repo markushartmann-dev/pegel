@@ -1,6 +1,6 @@
 # Pegel – Alkohol-Tagebuch
 
-![Next.js 16](https://img.shields.io/badge/Next.js-16-black?logo=nextdotjs) ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript&logoColor=white) ![PostgreSQL 17](https://img.shields.io/badge/PostgreSQL-17-4169e1?logo=postgresql&logoColor=white) ![Prisma 7](https://img.shields.io/badge/Prisma-7-2d3748?logo=prisma) ![Docker](https://img.shields.io/badge/Docker-Compose-2496ed?logo=docker&logoColor=white) ![PWA](https://img.shields.io/badge/PWA-installierbar-5a0fc8) ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg) [![Version](https://img.shields.io/badge/Version-1.5.0-informational)](CHANGELOG.md)
+![Next.js 16](https://img.shields.io/badge/Next.js-16-black?logo=nextdotjs) ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript&logoColor=white) ![PostgreSQL 17](https://img.shields.io/badge/PostgreSQL-17-4169e1?logo=postgresql&logoColor=white) ![Prisma 7](https://img.shields.io/badge/Prisma-7-2d3748?logo=prisma) ![Docker](https://img.shields.io/badge/Docker-Compose-2496ed?logo=docker&logoColor=white) ![PWA](https://img.shields.io/badge/PWA-installierbar-5a0fc8) ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg) [![Version](https://img.shields.io/badge/Version-1.5.1-informational)](CHANGELOG.md)
 
 > *Self-hosted alcohol diary (German UI): log drinks, statistics, calendar, a transparent Widmark-based BAC **estimate**, a savings jar for alcohol-free days, community ranking, admin area, PWA with push. Runs with `docker compose up -d --build`.*
 
@@ -21,6 +21,8 @@ Selbst gehostete WebApp zum Erfassen des eigenen Alkoholkonsums: persönliche Ge
 | **Getränke** – eigene Getränke, Favoriten, Archiv | **Verlauf** – Filter und Seitennavigation |
 | ![Administration](docs/screenshots/10-admin-benutzer.png) | ![Aktivitätsprotokoll](docs/screenshots/11-admin-protokoll.png) |
 | **Administration** – Benutzer, Status, Aktivität | **Aktivitätsprotokoll** – Sicherheits- und Systemereignisse |
+| ![Getränke-Vorschläge](docs/screenshots/18-admin-vorschlaege.png) | ![Neuigkeiten](docs/screenshots/17-neuigkeiten.png) |
+| **Getränke-Vorschläge** – Freigabe als Standardgetränk | **Neuigkeiten** – Changelog direkt in der App |
 | ![Onboarding](docs/screenshots/15-onboarding-profil.png) | ![Darstellung](docs/screenshots/08-darstellung.png) |
 | **Onboarding** – Berechnungsprofil mit Erklärung | **Darstellung** – Hell/Dunkel/System, 5 Farbschemata |
 
@@ -35,6 +37,7 @@ Selbst gehostete WebApp zum Erfassen des eigenen Alkoholkonsums: persönliche Ge
 | | | | |
 |---|---|---|---|
 | ![Mobil Übersicht](docs/screenshots/30-mobil-dashboard.png) | ![Mobil Erfassen](docs/screenshots/31-mobil-erfassen.png) | ![Mobil Kalender](docs/screenshots/32-mobil-kalender.png) | ![Mobil Community](docs/screenshots/33-mobil-community.png) |
+| ![Mobil Getränke](docs/screenshots/36-mobil-getraenke.png) | ![Mobil Neuigkeiten](docs/screenshots/37-mobil-neuigkeiten.png) | ![Mobil Menü](docs/screenshots/34-mobil-menue.png) | ![Mobil Sunset](docs/screenshots/35-mobil-sunset-dashboard.png) |
 
 Neu erzeugen: Demo-Server starten (`npm run build`, dann `E2E_PORT=3200 node scripts/e2e-server.mjs`), Demo-Daten laden (`DEMO_URL=http://localhost:3200 DATABASE_URL=postgresql://pegel:pegel@127.0.0.1:54332/pegel_e2e node scripts/demo-data.mjs`) und `DEMO_URL=http://localhost:3200 node scripts/screenshots.mjs` ausführen.
 
@@ -48,7 +51,7 @@ Neu erzeugen: Demo-Server starten (`npm run build`, dann `E2E_PORT=3200 node scr
 - **Promille-Schätzung:** zeitabhängiges Widmark-Modell mit Resorption und Abbau, mehreren Getränken, Unsicherheitsspanne und rechnerischem Nullzeitpunkt – inkl. Verlaufsdiagramm ([Modell](docs/BERECHNUNG.md)).
 - **Statistik & Kalender:** Tages-, Wochen- und Monatsübersichten, Kategorien, Wochentage, Vergleich mit dem Vorzeitraum; Monats-/Wochenkalender mit Tagesdetails.
 - **Sparschwein:** 5 € je Tag ohne Alkohol, +10 € je volle Woche am Stück, +20 € je ganzer Monat (konfigurierbar).
-- **Community:** Ranking nach Sparschwein und nach Menge, mit Anzeigename oder Pseudonym, jederzeit abwählbar. Wer 10 Tage nicht aktiv war, wird ausgeblendet.
+- **Community:** Ranking nach Sparschwein und nach Menge, mit Anzeigename oder Pseudonym, jederzeit abwählbar. Wer 7 Tage nicht aktiv war, wird ausgeblendet.
 - **Getränke-Vorschläge:** Eigene Getränke für alle vorschlagen; die Administration gibt sie als Standardgetränk frei oder lehnt mit Begründung ab.
 - **Administration:** Benutzer anlegen (Einladungslink oder Startpasswort), aktivieren/deaktivieren, Rollen, Sitzungen widerrufen, Reset-Links, Aktivitäts- und Sicherheitsprotokoll.
 - **Sicherheit & Datenschutz:** Datenbanksitzungen mit „Angemeldet bleiben“, Rate-Limits, CSP, CSRF-Schutz, Datenexport und Kontolöschung, keine Tracker.
@@ -145,7 +148,7 @@ Alle Einstellungen über `.env` (Vorlage: [.env.example](.env.example)). Secrets
 | `DEFAULT_TIMEZONE` | – | Standard-Zeitzone neuer Konten |
 | `MODEL_BETA_PER_HOUR` | – | Abbaurate β (Standard 0,15 ‰/h) |
 | `MODEL_ABSORPTION_MINUTES` | – | Resorptionsdauer je Getränk (Standard 30) |
-| `COMMUNITY_INACTIVE_DAYS` | – | Tage ohne Anmeldung/Aktivität, nach denen Teilnehmende in der Community ausgeblendet werden (10) |
+| `COMMUNITY_INACTIVE_DAYS` | – | Tage ohne Anmeldung/Aktivität, nach denen Teilnehmende in der Community ausgeblendet werden (7) |
 | `SAVINGS_PER_DAY` / `SAVINGS_WEEK_BONUS` / `SAVINGS_MONTH_BONUS` | – | Sparschwein in Euro: je Tag ohne Eintrag (5), je volle Woche am Stück (10), je kompletter Kalendermonat (20) |
 | `IMPRINT_NAME/STREET/CITY/COUNTRY/EMAIL/PHONE` | – | Angaben für Impressum und Verantwortlichen in den Datenschutzhinweisen – bewusst nur in der `.env`, nicht im Quellcode |
 | `SMTP_*` | – | Optionaler E-Mail-Versand (Bestätigung, Passwort-Reset) |

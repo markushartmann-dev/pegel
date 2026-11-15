@@ -6,6 +6,12 @@ Alle nennenswerten Änderungen an Pegel. Format nach [Keep a Changelog](https://
 
 ## [Unveröffentlicht]
 
+## [1.5.1] – 2026-11-15
+
+### Geändert
+- **Community:** Inaktive Teilnehmende werden schon nach 7 statt 10 Tagen ausgeblendet (`COMMUNITY_INACTIVE_DAYS`, Standard jetzt 7). Die Datenschutzhinweise nennen die eingestellte Frist.
+- **README-Screenshots erneuert:** aktuelle Navigation, neue Bilder für Neuigkeiten, Getränke-Vorschläge sowie Getränke und Neuigkeiten auf dem Handy.
+
 ## [1.5.0] – 2026-11-15
 
 ### Hinzugefügt
@@ -13,7 +19,7 @@ Alle nennenswerten Änderungen an Pegel. Format nach [Keep a Changelog](https://
 - **Freigabe durch die Administration:** Neuer Bereich Administration → Vorschläge (mit Zähler). Freigegebene Getränke werden sofort für alle verfügbar, bestehende Einträge bleiben erhalten. Bei Ablehnung sieht die Person die Begründung und kann nach einer Korrektur erneut vorschlagen. Alles wird protokolliert.
 
 ### Geändert
-- **Community ohne Karteileichen:** Wer seit 10 Tagen weder angemeldet noch aktiv war, wird im Mengen- und Sparschwein-Ranking ausgeblendet und erscheint mit der nächsten Anmeldung automatisch wieder. Die Frist ist über `COMMUNITY_INACTIVE_DAYS` einstellbar.
+- **Community ohne Karteileichen:** Wer seit 10 Tagen (ab 1.5.1: 7 Tagen) weder angemeldet noch aktiv war, wird im Mengen- und Sparschwein-Ranking ausgeblendet und erscheint mit der nächsten Anmeldung automatisch wieder. Die Frist ist über `COMMUNITY_INACTIVE_DAYS` einstellbar.
 - **Neuigkeiten, Hilfe und Rechtliches:** Die Kopfzeile mit „Zur App“ bleibt beim Scrollen stehen.
 
 ### Behoben
