@@ -6,6 +6,11 @@ Alle nennenswerten Änderungen an Pegel. Format nach [Keep a Changelog](https://
 
 ## [Unveröffentlicht]
 
+## [1.6.1] – 2026-11-21
+
+### Sicherheit
+- **Next.js 16.4.6:** Aktualisierung von 16.4.2 behebt mehrere bekannte Schwachstellen (u. a. Cache-Lecks und Antwort-Vermischung bei selbst gehosteten Installationen).
+
 ## [1.6.0] – 2026-11-21
 
 ### Hinzugefügt
