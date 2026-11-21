@@ -7,6 +7,7 @@ import {
   BarChart3,
   CalendarDays,
   CupSoda,
+  Dumbbell,
   History,
   LayoutDashboard,
   LogOut,
@@ -31,6 +32,7 @@ const MAIN = [
   { href: "/statistik", label: t.nav.statistics, icon: BarChart3 },
   { href: "/verlauf", label: t.nav.history, icon: History },
   { href: "/getraenke", label: t.nav.beverages, icon: CupSoda },
+  { href: "/sportarten", label: t.nav.activities, icon: Dumbbell },
   { href: "/community", label: t.nav.community, icon: Users },
   { href: "/einstellungen", label: t.nav.settings, icon: Settings },
 ];

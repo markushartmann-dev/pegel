@@ -89,3 +89,74 @@ export async function reviewSuggestion(actor: CurrentUser, id: string, raw: unkn
     return { status: "APPROVED" as const };
   });
 }
+
+// ---------- Sportarten ----------
+
+export async function suggestActivityType(user: CurrentUser, id: string, headers?: Headers) {
+  const a = await prisma.activityType.findUnique({ where: { id } });
+  if (!a || a.ownerId !== user.id) throw notFound("Sportart nicht gefunden.");
+  if (!a.isActive) throw badRequest("Archivierte Sportarten können nicht vorgeschlagen werden.");
+  if (a.suggestionStatus === "PENDING") return { status: "PENDING" as const };
+  const clash = await prisma.activityType.findFirst({ where: { ownerId: null, isDefault: true, name: a.name }, select: { id: true } });
+  if (clash) throw conflict("Es gibt bereits eine Standard-Sportart mit diesem Namen. Benenne deine Sportart vorher um.");
+  await prisma.activityType.update({
+    where: { id },
+    data: { suggestionStatus: "PENDING", suggestedAt: new Date(), suggestedById: user.id, suggestionNote: null, reviewedAt: null },
+  });
+  await audit({ action: "activity_type.suggested", actorId: user.id, entityType: "activity_type", entityId: id, headers });
+  return { status: "PENDING" as const };
+}
+
+export async function withdrawActivitySuggestion(user: CurrentUser, id: string, headers?: Headers) {
+  const a = await prisma.activityType.findUnique({ where: { id } });
+  if (!a || a.ownerId !== user.id) throw notFound("Sportart nicht gefunden.");
+  if (a.suggestionStatus !== "PENDING") return { status: a.suggestionStatus };
+  await prisma.activityType.update({ where: { id }, data: { suggestionStatus: "NONE", suggestedAt: null } });
+  await audit({ action: "activity_type.suggestion_withdrawn", actorId: user.id, entityType: "activity_type", entityId: id, headers });
+  return { status: "NONE" as const };
+}
+
+export async function listActivitySuggestions() {
+  const rows = await prisma.activityType.findMany({
+    where: { suggestionStatus: "PENDING", ownerId: { not: null } },
+    orderBy: { suggestedAt: "asc" },
+    include: { owner: { select: { id: true, name: true } } },
+  });
+  return rows.map((a) => ({
+    id: a.id,
+    name: a.name,
+    description: a.description,
+    icon: a.icon,
+    defaultIntensity: a.defaultIntensity,
+    suggestedAt: a.suggestedAt,
+    owner: a.owner,
+  }));
+}
+
+/** Offene Vorschläge insgesamt (Getränke und Sportarten) für den Admin-Tab. */
+export async function pendingAllSuggestionCount() {
+  const [b, a] = await Promise.all([pendingSuggestionCount(), prisma.activityType.count({ where: { suggestionStatus: "PENDING", ownerId: { not: null } } })]);
+  return b + a;
+}
+
+export async function reviewActivitySuggestion(actor: CurrentUser, id: string, raw: unknown, headers?: Headers) {
+  const input = reviewSchema.parse(raw);
+  return prisma.$transaction(async (tx) => {
+    const a = await tx.activityType.findUnique({ where: { id } });
+    if (!a || a.suggestionStatus !== "PENDING" || !a.ownerId) throw notFound("Vorschlag nicht gefunden oder bereits bearbeitet.");
+    if (input.decision === "reject") {
+      await tx.activityType.update({ where: { id }, data: { suggestionStatus: "REJECTED", suggestionNote: input.note, reviewedAt: new Date() } });
+      await audit({ action: "admin.activity_suggestion_rejected", actorId: actor.id, targetUserId: a.ownerId, entityType: "activity_type", entityId: id, headers }, tx);
+      return { status: "REJECTED" as const };
+    }
+    const clash = await tx.activityType.findFirst({ where: { ownerId: null, isDefault: true, name: a.name }, select: { id: true } });
+    if (clash) throw conflict("Es gibt bereits eine Standard-Sportart mit diesem Namen. Bitte ablehnen und Umbenennung erbitten.");
+    const last = await tx.activityType.aggregate({ where: { ownerId: null, isDefault: true }, _max: { sortOrder: true } });
+    await tx.activityType.update({
+      where: { id },
+      data: { ownerId: null, isDefault: true, isFavorite: false, sortOrder: (last._max.sortOrder ?? 0) + 1, suggestionStatus: "APPROVED", reviewedAt: new Date() },
+    });
+    await audit({ action: "admin.activity_suggestion_approved", actorId: actor.id, targetUserId: a.ownerId, entityType: "activity_type", entityId: id, headers }, tx);
+    return { status: "APPROVED" as const };
+  });
+}

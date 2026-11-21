@@ -93,9 +93,9 @@ model User {
   role          Role          @default(USER)
   status        AccountStatus @default(ACTIVE)
 
-  lastLoginAt     DateTime? @db.Timestamptz(3)
-  lastActiveAt    DateTime? @db.Timestamptz(3)
-  lastLogoutAt    DateTime? @db.Timestamptz(3)
+  lastLoginAt      DateTime? @db.Timestamptz(3)
+  lastActiveAt     DateTime? @db.Timestamptz(3)
+  lastLogoutAt     DateTime? @db.Timestamptz(3)
   profileUpdatedAt DateTime? @db.Timestamptz(3)
 
   timezone            String      @default("Europe/Berlin")
@@ -105,28 +105,33 @@ model User {
   themeMode           ThemeMode   @default(SYSTEM)
   colorScheme         ColorScheme @default(MIDNIGHT)
 
-  notificationsEnabled Boolean @default(false)
-  reminderEnabled      Boolean @default(false)
+  notificationsEnabled   Boolean   @default(false)
+  reminderEnabled        Boolean   @default(false)
   /// Lokale Uhrzeit "HH:mm" in der Zeitzone des Benutzers
-  reminderTime         String  @default("21:00")
-  weeklySummaryEnabled Boolean @default(false)
+  reminderTime           String    @default("21:00")
+  weeklySummaryEnabled   Boolean   @default(false)
+  /// Einmaliger Hinweis auf das Sport-Tracking (1.6) für Konten, die vorher bestanden; null = noch nicht gesehen
+  sportNoticeDismissedAt DateTime? @db.Timestamptz(3)
 
   communityOptIn     Boolean          @default(true)
   communityDisplay   CommunityDisplay @default(DISPLAY_NAME)
   communityPseudonym String?
 
-  sessions          Session[]
-  accounts          Account[]
-  profile           UserProfile?
-  profileRevisions  UserProfileRevision[]
-  beverages         Beverage[]
-  suggestedBeverages Beverage[] @relation("BeverageSuggestions")
-  entries           ConsumptionEntry[]
-  pushSubscriptions PushSubscription[]
-  notifications     UserNotification[]
-  consents          UserConsent[]
-  auditLogs         AuditLog[]           @relation("AuditActor")
-  auditTargets      AuditLog[]           @relation("AuditTarget")
+  sessions               Session[]
+  accounts               Account[]
+  profile                UserProfile?
+  profileRevisions       UserProfileRevision[]
+  beverages              Beverage[]
+  suggestedBeverages     Beverage[]            @relation("BeverageSuggestions")
+  entries                ConsumptionEntry[]
+  activityTypes          ActivityType[]
+  suggestedActivityTypes ActivityType[]        @relation("ActivityTypeSuggestions")
+  activityEntries        ActivityEntry[]
+  pushSubscriptions      PushSubscription[]
+  notifications          UserNotification[]
+  consents               UserConsent[]
+  auditLogs              AuditLog[]            @relation("AuditActor")
+  auditTargets           AuditLog[]            @relation("AuditTarget")
 
   @@index([role])
   @@index([status])
@@ -223,32 +228,32 @@ model UserProfileRevision {
 }
 
 model Beverage {
-  id            String           @id @default(cuid())
-  name          String
-  description   String?
-  volumeMl      Int
+  id               String             @id @default(cuid())
+  name             String
+  description      String?
+  volumeMl         Int
   /// Alkoholgehalt in % vol (z. B. 5.0)
-  abv           Decimal          @db.Decimal(4, 1)
+  abv              Decimal            @db.Decimal(4, 1)
   /// Reiner Alkohol in Gramm: volumeMl × abv/100 × 0,789
-  alcoholGrams  Decimal          @db.Decimal(7, 2)
-  category      BeverageCategory @default(OTHER)
-  icon          String?
+  alcoholGrams     Decimal            @db.Decimal(7, 2)
+  category         BeverageCategory   @default(OTHER)
+  icon             String?
   /// null = globales Standardgetränk
-  ownerId       String?
-  owner         User?            @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  isDefault     Boolean          @default(false)
-  isActive      Boolean          @default(true)
-  isFavorite    Boolean          @default(false)
-  suggestionStatus SuggestionStatus @default(NONE)
-  suggestedAt      DateTime?        @db.Timestamptz(3)
+  ownerId          String?
+  owner            User?              @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  isDefault        Boolean            @default(false)
+  isActive         Boolean            @default(true)
+  isFavorite       Boolean            @default(false)
+  suggestionStatus SuggestionStatus   @default(NONE)
+  suggestedAt      DateTime?          @db.Timestamptz(3)
   suggestedById    String?
-  suggestedBy      User?            @relation("BeverageSuggestions", fields: [suggestedById], references: [id], onDelete: SetNull)
+  suggestedBy      User?              @relation("BeverageSuggestions", fields: [suggestedById], references: [id], onDelete: SetNull)
   suggestionNote   String?
-  reviewedAt       DateTime?        @db.Timestamptz(3)
-  sortOrder     Int              @default(0)
-  createdAt     DateTime         @default(now()) @db.Timestamptz(3)
-  updatedAt     DateTime         @updatedAt @db.Timestamptz(3)
-  entries       ConsumptionEntry[]
+  reviewedAt       DateTime?          @db.Timestamptz(3)
+  sortOrder        Int                @default(0)
+  createdAt        DateTime           @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime           @updatedAt @db.Timestamptz(3)
+  entries          ConsumptionEntry[]
 
   @@unique([ownerId, name])
   @@index([ownerId, isActive])
@@ -290,16 +295,16 @@ model ConsumptionEntry {
 }
 
 model PushSubscription {
-  id          String    @id @default(cuid())
-  userId      String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  endpoint    String    @unique
-  p256dh      String
-  auth        String
-  userAgent   String?
-  createdAt   DateTime  @default(now()) @db.Timestamptz(3)
-  lastUsedAt  DateTime? @db.Timestamptz(3)
-  failureCount Int      @default(0)
+  id           String    @id @default(cuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint     String    @unique
+  p256dh       String
+  auth         String
+  userAgent    String?
+  createdAt    DateTime  @default(now()) @db.Timestamptz(3)
+  lastUsedAt   DateTime? @db.Timestamptz(3)
+  failureCount Int       @default(0)
 
   @@index([userId])
   @@map("push_subscription")
@@ -369,4 +374,68 @@ enum SuggestionStatus {
   PENDING
   REJECTED
   APPROVED
+}
+
+/// Intensität einer Sporteinheit. Für den WHO-Richtwert zählen mittel (1×) und intensiv (2×).
+enum ActivityIntensity {
+  LIGHT
+  MODERATE
+  VIGOROUS
+}
+
+/// Sportart: global (ownerId = null, isDefault) oder eigene des Benutzers – analog zu Beverage.
+model ActivityType {
+  id               String            @id @default(cuid())
+  name             String
+  description      String?
+  icon             String?
+  defaultIntensity ActivityIntensity @default(MODERATE)
+  ownerId          String?
+  owner            User?             @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  isDefault        Boolean           @default(false)
+  isActive         Boolean           @default(true)
+  isFavorite       Boolean           @default(false)
+  suggestionStatus SuggestionStatus  @default(NONE)
+  suggestedAt      DateTime?         @db.Timestamptz(3)
+  suggestedById    String?
+  suggestedBy      User?             @relation("ActivityTypeSuggestions", fields: [suggestedById], references: [id], onDelete: SetNull)
+  suggestionNote   String?
+  reviewedAt       DateTime?         @db.Timestamptz(3)
+  sortOrder        Int               @default(0)
+  createdAt        DateTime          @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime          @updatedAt @db.Timestamptz(3)
+  entries          ActivityEntry[]
+
+  @@unique([ownerId, name])
+  @@index([ownerId, isActive])
+  @@index([isDefault, isActive])
+  @@index([suggestionStatus])
+  @@map("activity_type")
+}
+
+/// Sporteinheit. Name, Symbol und Intensität werden als Snapshot gespeichert.
+model ActivityEntry {
+  id              String            @id @default(cuid())
+  userId          String
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activityTypeId  String?
+  activityType    ActivityType?     @relation(fields: [activityTypeId], references: [id], onDelete: SetNull)
+  activityName    String
+  icon            String?
+  durationMin     Int
+  intensity       ActivityIntensity
+  /// Beginn der Einheit
+  performedAt     DateTime          @db.Timestamptz(3)
+  /// Zeitzone, in der der Zeitpunkt eingegeben wurde (IANA)
+  timezone        String
+  note            String?
+  clientRequestId String?
+  createdAt       DateTime          @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime          @updatedAt @db.Timestamptz(3)
+
+  @@unique([userId, clientRequestId])
+  @@index([userId, performedAt])
+  @@index([activityTypeId])
+  @@index([performedAt])
+  @@map("activity_entry")
 }

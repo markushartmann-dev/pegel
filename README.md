@@ -1,10 +1,10 @@
 # Pegel – Alkohol-Tagebuch
 
-![Next.js 16](https://img.shields.io/badge/Next.js-16-black?logo=nextdotjs) ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript&logoColor=white) ![PostgreSQL 17](https://img.shields.io/badge/PostgreSQL-17-4169e1?logo=postgresql&logoColor=white) ![Prisma 7](https://img.shields.io/badge/Prisma-7-2d3748?logo=prisma) ![Docker](https://img.shields.io/badge/Docker-Compose-2496ed?logo=docker&logoColor=white) ![PWA](https://img.shields.io/badge/PWA-installierbar-5a0fc8) ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg) [![Version](https://img.shields.io/badge/Version-1.5.1-informational)](CHANGELOG.md)
+![Next.js 16](https://img.shields.io/badge/Next.js-16-black?logo=nextdotjs) ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript&logoColor=white) ![PostgreSQL 17](https://img.shields.io/badge/PostgreSQL-17-4169e1?logo=postgresql&logoColor=white) ![Prisma 7](https://img.shields.io/badge/Prisma-7-2d3748?logo=prisma) ![Docker](https://img.shields.io/badge/Docker-Compose-2496ed?logo=docker&logoColor=white) ![PWA](https://img.shields.io/badge/PWA-installierbar-5a0fc8) ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg) [![Version](https://img.shields.io/badge/Version-1.6.0-informational)](CHANGELOG.md)
 
-> *Self-hosted alcohol diary (German UI): log drinks, statistics, calendar, a transparent Widmark-based BAC **estimate**, a savings jar for alcohol-free days, community ranking, admin area, PWA with push. Runs with `docker compose up -d --build`.*
+> *Self-hosted alcohol diary (German UI): log drinks, statistics, calendar, a transparent Widmark-based BAC **estimate**, a savings jar for alcohol-free days, sport tracking with the WHO weekly target, community ranking, admin area, PWA with push. Runs with `docker compose up -d --build`.*
 
-Selbst gehostete WebApp zum Erfassen des eigenen Alkoholkonsums: persönliche Getränke, Dashboard mit Statistiken, Kalender, transparente Promille-**Schätzung** nach einem zeitabhängigen Widmark-Modell, Community-Ranking mit Sparschwein (Geld für alkoholfreie Tage), Administration mit Aktivitätsprotokoll, fünf Farbschemata mit Hell/Dunkel/System, installierbar als PWA mit optionalen Push-Erinnerungen.
+Selbst gehostete WebApp zum Erfassen des eigenen Alkoholkonsums: persönliche Getränke, Dashboard mit Statistiken, Kalender, transparente Promille-**Schätzung** nach einem zeitabhängigen Widmark-Modell, Sport-Tracking mit WHO-Wochenziel, Community-Ranking mit Sparschwein (Geld für alkoholfreie Tage) und Bewegung, Administration mit Aktivitätsprotokoll, fünf Farbschemata mit Hell/Dunkel/System, installierbar als PWA mit optionalen Push-Erinnerungen.
 
 ![Übersicht mit Modellschätzung, Sparschwein und 30-Tage-Verlauf](docs/screenshots/01-dashboard.png)
 
@@ -23,6 +23,10 @@ Selbst gehostete WebApp zum Erfassen des eigenen Alkoholkonsums: persönliche Ge
 | **Administration** – Benutzer, Status, Aktivität | **Aktivitätsprotokoll** – Sicherheits- und Systemereignisse |
 | ![Getränke-Vorschläge](docs/screenshots/18-admin-vorschlaege.png) | ![Neuigkeiten](docs/screenshots/17-neuigkeiten.png) |
 | **Getränke-Vorschläge** – Freigabe als Standardgetränk | **Neuigkeiten** – Changelog direkt in der App |
+| ![Sport erfassen](docs/screenshots/19-sport-erfassen.png) | ![Sportarten](docs/screenshots/25-sportarten.png) |
+| **Sport erfassen** – Sportart, Dauer-Schnellauswahl, Intensität | **Sportarten** – Standard und eigene, Vorschläge |
+| ![Verlauf Sport](docs/screenshots/26-verlauf-sport.png) | ![Onboarding Datenschutz](docs/screenshots/14-onboarding-datenschutz.png) |
+| **Verlauf** – Sporteinheiten mit Filter und Summe | **Onboarding** – Einwilligung und Datenschutz |
 | ![Onboarding](docs/screenshots/15-onboarding-profil.png) | ![Darstellung](docs/screenshots/08-darstellung.png) |
 | **Onboarding** – Berechnungsprofil mit Erklärung | **Darstellung** – Hell/Dunkel/System, 5 Farbschemata |
 
@@ -38,6 +42,7 @@ Selbst gehostete WebApp zum Erfassen des eigenen Alkoholkonsums: persönliche Ge
 |---|---|---|---|
 | ![Mobil Übersicht](docs/screenshots/30-mobil-dashboard.png) | ![Mobil Erfassen](docs/screenshots/31-mobil-erfassen.png) | ![Mobil Kalender](docs/screenshots/32-mobil-kalender.png) | ![Mobil Community](docs/screenshots/33-mobil-community.png) |
 | ![Mobil Getränke](docs/screenshots/36-mobil-getraenke.png) | ![Mobil Neuigkeiten](docs/screenshots/37-mobil-neuigkeiten.png) | ![Mobil Menü](docs/screenshots/34-mobil-menue.png) | ![Mobil Sunset](docs/screenshots/35-mobil-sunset-dashboard.png) |
+| ![Mobil Sport erfassen](docs/screenshots/38-mobil-sport-erfassen.png) | ![Mobil Bewegung](docs/screenshots/39-mobil-bewegung.png) | | |
 
 Neu erzeugen: Demo-Server starten (`npm run build`, dann `E2E_PORT=3200 node scripts/e2e-server.mjs`), Demo-Daten laden (`DEMO_URL=http://localhost:3200 DATABASE_URL=postgresql://pegel:pegel@127.0.0.1:54332/pegel_e2e node scripts/demo-data.mjs`) und `DEMO_URL=http://localhost:3200 node scripts/screenshots.mjs` ausführen.
 
@@ -51,8 +56,9 @@ Neu erzeugen: Demo-Server starten (`npm run build`, dann `E2E_PORT=3200 node scr
 - **Promille-Schätzung:** zeitabhängiges Widmark-Modell mit Resorption und Abbau, mehreren Getränken, Unsicherheitsspanne und rechnerischem Nullzeitpunkt – inkl. Verlaufsdiagramm ([Modell](docs/BERECHNUNG.md)).
 - **Statistik & Kalender:** Tages-, Wochen- und Monatsübersichten, Kategorien, Wochentage, Vergleich mit dem Vorzeitraum; Monats-/Wochenkalender mit Tagesdetails.
 - **Sparschwein:** 5 € je Tag ohne Alkohol, +10 € je volle Woche am Stück, +20 € je ganzer Monat (konfigurierbar).
-- **Community:** Ranking nach Sparschwein und nach Menge, mit Anzeigename oder Pseudonym, jederzeit abwählbar. Wer 7 Tage nicht aktiv war, wird ausgeblendet.
-- **Getränke-Vorschläge:** Eigene Getränke für alle vorschlagen; die Administration gibt sie als Standardgetränk frei oder lehnt mit Begründung ab.
+- **Sport-Tracking:** Sportarten wie Getränke (Standard und eigene), Dauer per Schnellauswahl (30/60/90/120 Min. oder frei), Intensität leicht/mittel/intensiv. Wochenkachel mit WHO-Richtwert (150 Min. mittel bzw. 75 Min. intensiv), Sporttage im Kalender, eigener Verlauf. Sport wird bewusst nicht mit Alkohol verrechnet und ändert die Promille-Schätzung nicht.
+- **Community:** Ranking nach Sparschwein, Bewegung und Menge, mit Anzeigename oder Pseudonym, jederzeit abwählbar. Wer 7 Tage nicht aktiv war, wird ausgeblendet.
+- **Vorschläge:** Eigene Getränke und Sportarten für alle vorschlagen; die Administration gibt sie als Standard frei oder lehnt mit Begründung ab.
 - **Administration:** Benutzer anlegen (Einladungslink oder Startpasswort), aktivieren/deaktivieren, Rollen, Sitzungen widerrufen, Reset-Links, Aktivitäts- und Sicherheitsprotokoll.
 - **Sicherheit & Datenschutz:** Datenbanksitzungen mit „Angemeldet bleiben“, Rate-Limits, CSP, CSRF-Schutz, Datenexport und Kontolöschung, keine Tracker.
 - **Oberfläche:** Deutsch, responsiv, Hell/Dunkel/System und 5 Farbschemata, installierbar als PWA, optionale Push-Erinnerungen.

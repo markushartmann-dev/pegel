@@ -6,6 +6,19 @@ Alle nennenswerten Änderungen an Pegel. Format nach [Keep a Changelog](https://
 
 ## [Unveröffentlicht]
 
+## [1.6.0] – 2026-11-21
+
+### Hinzugefügt
+- **Sport-Tracking:** Unter „Erfassen“ lässt sich oben zwischen „Getränk“ und „Sport“ umschalten. Sportart antippen, Dauer wählen (30, 60, 90 oder 120 Minuten oder eine eigene Angabe) und die Intensität (leicht, mittel, intensiv) festlegen. Jede Sportart bringt eine übliche Intensität mit, die sich pro Einheit ändern lässt. Einheiten können bearbeitet, gelöscht und für vergangene Tage nachgetragen werden.
+- **Sportarten:** Acht Standard-Sportarten (Laufen, Radfahren, Spazieren/Wandern, Krafttraining/Fitness, Schwimmen, Ballsport, Yoga/Pilates, Sonstiges) und eigene Sportarten mit Symbol, Favoriten und Archiv unter dem neuen Menüpunkt „Sportarten“. Eigene Sportarten lassen sich wie Getränke für alle vorschlagen; die Administration gibt sie unter „Vorschläge“ frei.
+- **Bewegung diese Woche:** Neue Kachel in der Übersicht mit Minuten pro Wochentag und Fortschritt zum WHO-Richtwert (150 Minuten mittel oder 75 Minuten intensiv; intensive Minuten zählen doppelt, leichte nicht).
+- **Kalender und Verlauf:** Sporttage sind im Kalender mit einem Symbol markiert, die Tagesansicht zeigt die Einheiten. Der Verlauf hat einen eigenen Reiter „Sport“ mit Filter nach Sportart und Gesamtdauer.
+- **Bewegungs-Ranking:** Die Community zeigt zusätzlich die erfassten Sportminuten der Teilnehmenden – mit derselben Einwilligung, demselben Pseudonym und derselben 7-Tage-Regel wie die anderen Rankings.
+
+### Geändert
+- **Kein Verrechnen:** Sport gleicht Alkohol nicht aus. Die Promille-Schätzung und das Sparschwein bleiben unverändert, Kalorien werden nicht berechnet.
+- **Datenschutz:** Datenschutzhinweise, Einwilligungstexte, Datenexport und Kontolöschung umfassen jetzt auch Sportdaten. Bestehende Konten sehen einmalig einen Hinweis in der Übersicht.
+
 ## [1.5.1] – 2026-11-15
 
 ### Geändert

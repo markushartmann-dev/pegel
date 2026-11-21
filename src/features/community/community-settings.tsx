@@ -41,7 +41,7 @@ export function CommunitySettings({
       <label className="flex items-start gap-3 text-sm">
         <input type="checkbox" checked={optIn} onChange={(e) => setOptIn(e.target.checked)} className="mt-0.5 size-4 accent-[var(--primary)]" />
         <span>
-          Ich willige ein, dass meine erfasste Gesamtmenge (Gramm reiner Alkohol) anderen angemeldeten Benutzern dieser App im Ranking angezeigt wird.
+          Ich willige ein, dass meine erfasste Gesamtmenge (Gramm reiner Alkohol) und meine Sportminuten anderen angemeldeten Benutzern dieser App in den Rankings angezeigt werden.
         </span>
       </label>
       {optIn && (

@@ -47,15 +47,16 @@ export function toEntryDTO(e: EntryRow, tz: string): EntryDTO {
   };
 }
 
-function resolveTime(local: string, tz: string): Date {
+/** Lokale Eingabezeit prüfen und umrechnen (auch für Sporteinheiten, dann mit field = "performedAtLocal"). */
+export function resolveTime(local: string, tz: string, field = "consumedAtLocal"): Date {
   const d = parseLocalDateTime(local, tz);
-  if (!d) throw badRequest("Ungültiger Zeitpunkt.", { consumedAtLocal: "Ungültiger Zeitpunkt." });
+  if (!d) throw badRequest("Ungültiger Zeitpunkt.", { [field]: "Ungültiger Zeitpunkt." });
   if (d.getTime() > Date.now() + MAX_FUTURE_MS) {
-    throw badRequest("Der Zeitpunkt liegt in der Zukunft.", { consumedAtLocal: "Der Zeitpunkt liegt in der Zukunft." });
+    throw badRequest("Der Zeitpunkt liegt in der Zukunft.", { [field]: "Der Zeitpunkt liegt in der Zukunft." });
   }
   const min = new Date();
   min.setFullYear(min.getFullYear() - MAX_PAST_YEARS);
-  if (d < min) throw badRequest("Der Zeitpunkt liegt zu weit in der Vergangenheit.", { consumedAtLocal: "Zu weit in der Vergangenheit." });
+  if (d < min) throw badRequest("Der Zeitpunkt liegt zu weit in der Vergangenheit.", { [field]: "Zu weit in der Vergangenheit." });
   return d;
 }
 

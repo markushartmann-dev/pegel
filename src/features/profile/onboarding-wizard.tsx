@@ -115,13 +115,13 @@ export function OnboardingWizard({
           <h2 className="mb-3 text-lg font-semibold">Wie Pegel mit deinen Daten umgeht</h2>
           <div className="space-y-3 text-sm text-fg-muted">
             <p>
-              Pegel speichert deine erfassten Getränke, Profilangaben (Gewicht, Größe, Berechnungsprofil) und Einstellungen auf diesem Server, um dir
+              Pegel speichert deine erfassten Getränke und Sporteinheiten, Profilangaben (Gewicht, Größe, Berechnungsprofil) und Einstellungen auf diesem Server, um dir
               Statistiken und eine <strong className="text-fg">rechnerische Schätzung</strong> des Blutalkohols anzuzeigen. Angaben zum
-              Alkoholkonsum können Gesundheitsdaten im Sinne von Art. 9 DSGVO sein – deshalb fragen wir ausdrücklich nach deiner Einwilligung.
+              Alkoholkonsum und Sport können Gesundheitsdaten im Sinne von Art. 9 DSGVO sein – deshalb fragen wir ausdrücklich nach deiner Einwilligung.
             </p>
             <p>
               Deine einzelnen Einträge sind privat. Administratoren sehen Kontodaten und Aktivitätszeitpunkte, aber nicht deine Einträge. Im
-              Community-Ranking sehen andere angemeldete Benutzer nur deine Gesamtmenge – die Teilnahme kannst du im letzten Schritt und
+              Community-Ranking sehen andere angemeldete Benutzer nur deine Gesamtmenge und deine Sportminuten – die Teilnahme kannst du im letzten Schritt und
               jederzeit später abwählen. Du kannst deine Daten jederzeit exportieren und dein Konto löschen.
             </p>
             <Alert tone="warning" title="Wichtig: Schätzung, keine Messung">
@@ -146,7 +146,7 @@ export function OnboardingWizard({
             <label className="flex items-start gap-3 text-sm">
               <input type="checkbox" checked={health} onChange={(e) => setHealth(e.target.checked)} className="mt-0.5 size-4 accent-[var(--primary)]" />
               <span>
-                Ich willige ein, dass meine Angaben zum Alkoholkonsum und meine Körperdaten zu den genannten Zwecken verarbeitet werden. Die
+                Ich willige ein, dass meine Angaben zum Alkoholkonsum, zu Sporteinheiten und meine Körperdaten zu den genannten Zwecken verarbeitet werden. Die
                 Einwilligung kann ich jederzeit durch Löschen meines Kontos widerrufen.
               </span>
             </label>
@@ -204,7 +204,7 @@ export function OnboardingWizard({
               <span>
                 Am Community-Ranking teilnehmen
                 <span className="block text-xs text-fg-muted">
-                  Andere angemeldete Benutzer dieser App sehen deinen Anzeigenamen und deine erfasste Gesamtmenge (Gramm reiner Alkohol), keine
+                  Andere angemeldete Benutzer dieser App sehen deinen Anzeigenamen, deine erfasste Gesamtmenge (Gramm reiner Alkohol) und deine Sportminuten, keine
                   einzelnen Einträge. Pseudonym oder Abmeldung jederzeit unter „Community“.
                 </span>
               </span>

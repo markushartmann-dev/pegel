@@ -1,11 +1,12 @@
 /**
- * Seed: legt die Standardgetränke an bzw. aktualisiert sie (idempotent).
+ * Seed: legt die Standardgetränke und Standard-Sportarten an (idempotent).
  * Wird nach `prisma migrate deploy` ausgeführt (Docker-Service "migrate").
  */
 import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { DEFAULT_BEVERAGES } from "../src/lib/default-beverages";
+import { DEFAULT_ACTIVITY_TYPES } from "../src/lib/activities";
 import { alcoholGrams, roundGrams } from "../src/lib/calculations/alcohol";
 
 const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL!, options: "-c TimeZone=UTC" }) });
@@ -41,6 +42,17 @@ async function main() {
     created++;
   }
   console.log(`Seed abgeschlossen: ${created} Standardgetränk(e) neu angelegt, ${DEFAULT_BEVERAGES.length - created} bereits vorhanden.`);
+
+  let createdActivities = 0;
+  for (const [i, a] of DEFAULT_ACTIVITY_TYPES.entries()) {
+    const existing = await prisma.activityType.findFirst({ where: { ownerId: null, isDefault: true, name: a.name } });
+    if (existing) continue; // vom Admin angepasste Sportarten nicht überschreiben
+    await prisma.activityType.create({
+      data: { name: a.name, description: a.description, icon: a.icon, defaultIntensity: a.defaultIntensity, isDefault: true, ownerId: null, sortOrder: i },
+    });
+    createdActivities++;
+  }
+  console.log(`Seed abgeschlossen: ${createdActivities} Standard-Sportart(en) neu angelegt, ${DEFAULT_ACTIVITY_TYPES.length - createdActivities} bereits vorhanden.`);
 }
 
 main()

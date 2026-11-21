@@ -33,7 +33,7 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
     <div className="flex flex-col gap-6">
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Stat label="Benutzer" value={overview.users} sub={`${overview.active} aktiv · ${overview.admins} Admin(s)`} />
-        <Stat label="Konsumeinträge" value={overview.entries} />
+        <Stat label="Konsumeinträge" value={overview.entries} sub={`${overview.activities} Sporteinheiten`} />
         <Stat label="Sicherheitsereignisse (24 h)" value={overview.security24h} sub={<Link href="/admin/protokoll?severity=SECURITY" className="underline">anzeigen</Link>} />
         <Stat label="Fehler (24 h)" value={overview.errors24h} sub={`E-Mail: ${overview.mailEnabled ? "aktiv" : "nicht konfiguriert"} · Push: ${overview.pushEnabled ? "aktiv" : "nicht konfiguriert"}`} />
       </div>

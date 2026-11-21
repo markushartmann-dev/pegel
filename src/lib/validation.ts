@@ -6,6 +6,7 @@ import { z } from "zod";
 import { LIMITS } from "./calculations/alcohol";
 import { PROFILE_LIMITS } from "./calculations/widmark";
 import { isValidClock, isValidDayKey, isValidTimeZone } from "./dates";
+import { ACTIVITY_ICONS, DURATION_LIMITS, INTENSITIES } from "./activities";
 
 const trimmed = (max: number) => z.string().trim().max(max, `Maximal ${max} Zeichen.`);
 
@@ -70,6 +71,47 @@ export const entryUpdateSchema = z.object({
   volumeMl: volumeSchema.optional(),
   abv: abvSchema.optional(),
   consumedAtLocal: entryInputSchema.shape.consumedAtLocal.optional(),
+  timezone: timezoneSchema.optional(),
+  note: trimmed(300).optional().nullable(),
+});
+
+// ---------- Sport ----------
+
+export const intensityEnum = z.enum(INTENSITIES, { error: "Bitte eine Intensität wählen." });
+
+export const durationSchema = z.coerce
+  .number({ error: "Dauer ist erforderlich." })
+  .int("Dauer bitte in ganzen Minuten angeben.")
+  .min(DURATION_LIMITS.min, "Dauer muss mindestens 1 Minute betragen.")
+  .max(DURATION_LIMITS.max, "Dauer darf höchstens 600 Minuten (10 Stunden) betragen.");
+
+export const activityTypeInputSchema = z.object({
+  name: trimmed(60).min(2, "Name muss mindestens 2 Zeichen lang sein."),
+  description: trimmed(200).optional().nullable(),
+  icon: z.enum(ACTIVITY_ICONS).default("other"),
+  defaultIntensity: intensityEnum.default("MODERATE"),
+  isFavorite: z.boolean().optional(),
+});
+
+export const activityTypeUpdateSchema = activityTypeInputSchema.partial().extend({
+  isActive: z.boolean().optional(),
+});
+
+export const activityEntryInputSchema = z.object({
+  activityTypeId: z.string().min(1, "Bitte eine Sportart auswählen."),
+  durationMin: durationSchema,
+  intensity: intensityEnum.optional(),
+  /** lokale Zeit "YYYY-MM-DDTHH:mm" in `timezone` (Beginn der Einheit) */
+  performedAtLocal: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, "Ungültiger Zeitpunkt."),
+  timezone: timezoneSchema,
+  note: trimmed(300).optional().nullable(),
+  clientRequestId: z.string().uuid().optional(),
+});
+
+export const activityEntryUpdateSchema = z.object({
+  durationMin: durationSchema.optional(),
+  intensity: intensityEnum.optional(),
+  performedAtLocal: activityEntryInputSchema.shape.performedAtLocal.optional(),
   timezone: timezoneSchema.optional(),
   note: trimmed(300).optional().nullable(),
 });
@@ -150,6 +192,7 @@ export const historyQuerySchema = z.object({
   page: z.coerce.number().int().min(1).max(10_000).default(1),
   pageSize: z.coerce.number().int().min(5).max(100).default(25),
   beverageId: z.string().max(40).optional(),
+  activityTypeId: z.string().max(40).optional(),
   from: dayKeySchema.optional(),
   to: dayKeySchema.optional(),
 });

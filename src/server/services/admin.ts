@@ -244,13 +244,14 @@ export async function auditLogPage(raw: unknown) {
 
 export async function systemOverview() {
   const since = new Date(Date.now() - 24 * 3_600_000);
-  const [users, active, admins, entries, errors24h, security24h] = await Promise.all([
+  const [users, active, admins, entries, activities, errors24h, security24h] = await Promise.all([
     prisma.user.count(),
     prisma.user.count({ where: { status: "ACTIVE" } }),
     prisma.user.count({ where: { role: "ADMIN", status: "ACTIVE" } }),
     prisma.consumptionEntry.count(),
+    prisma.activityEntry.count(),
     prisma.auditLog.count({ where: { severity: "ERROR", createdAt: { gte: since } } }),
     prisma.auditLog.count({ where: { severity: "SECURITY", createdAt: { gte: since } } }),
   ]);
-  return { users, active, admins, entries, errors24h, security24h, mailEnabled: env.mailEnabled, pushEnabled: env.pushEnabled };
+  return { users, active, admins, entries, activities, errors24h, security24h, mailEnabled: env.mailEnabled, pushEnabled: env.pushEnabled };
 }

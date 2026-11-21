@@ -4,7 +4,7 @@ import { chromium } from "@playwright/test";
 
 const BASE = process.env.DEMO_URL ?? "http://localhost:3200";
 const PAGES = [
-  "/dashboard", "/erfassen", "/kalender", "/kalender?ansicht=woche", "/statistik?zeitraum=30d", "/verlauf", "/getraenke",
+  "/dashboard", "/erfassen", "/kalender", "/kalender?ansicht=woche", "/statistik?zeitraum=30d", "/verlauf", "/verlauf?art=sport", "/erfassen?art=sport", "/sportarten", "/getraenke",
   "/community?zeitraum=month", "/einstellungen", "/einstellungen/darstellung", "/einstellungen/benachrichtigungen",
   "/einstellungen/sicherheit", "/einstellungen/daten", "/admin", "/admin/protokoll", "/admin/vorschlaege",
   "/hilfe", "/hinweise", "/neuigkeiten", "/datenschutz", "/impressum",

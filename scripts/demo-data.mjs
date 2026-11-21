@@ -23,12 +23,15 @@ const PERSONAS = [
     pattern: { weekday: 0.12, weekend: 0.55, drinks: ["Riesling trocken", "Sekt", "Wein 0,2 l", "Bier 0,33 l"], max: 3 },
     dryRecent: 9, // heute: [Getränk, Portionen, vor wie vielen Minuten]
     today: [["Sekt", 1, 110], ["Riesling trocken", 1, 50]],
+    ownSport: [{ name: "Bouldern", icon: "strength", defaultIntensity: "VIGOROUS", description: "Halle in der Stadt" }],
+    sport: { chance: 0.45, types: ["Laufen", "Yoga/Pilates", "Bouldern", "Radfahren"], durations: [30, 45, 60, 90] },
   },
   {
     name: "Jonas Weber", email: "jonas@pegel.demo", model: "WIDMARK_MALE", weight: 86, height: 184, scheme: "OCEAN",
     community: { display: "PSEUDONYM", pseudonym: "Hopfenheld" },
     own: [{ name: "Helles vom Fass", volumeMl: 500, abv: 4.9, category: "BEER", description: "Stammkneipe" }],
     pattern: { weekday: 0.35, weekend: 0.8, drinks: ["Helles vom Fass", "Bier 0,5 l", "Weizen 0,5 l", "Schnaps 2 cl"], max: 4 },
+    sport: { chance: 0.2, types: ["Ballsport", "Radfahren"], durations: [60, 90, 120] },
   },
   {
     name: "Sophie Krause", email: "sophie@pegel.demo", model: "SEIDL_FEMALE", weight: 58, height: 172, scheme: "FOREST",
@@ -36,18 +39,21 @@ const PERSONAS = [
     own: [],
     pattern: { weekday: 0.03, weekend: 0.18, drinks: ["Radler 0,5 l", "Sekt", "Bier klein"], max: 2 },
     dryRecent: 31,
+    sport: { chance: 0.6, types: ["Schwimmen", "Laufen", "Spazieren/Wandern"], durations: [30, 60, 90] },
   },
   {
     name: "Max Becker", email: "max@pegel.demo", model: "SEIDL_MALE", weight: 92, height: 190, scheme: "SUNSET",
     community: { display: "PSEUDONYM", pseudonym: "Mäxchen" },
     own: [{ name: "Gin Tonic", volumeMl: 240, abv: 6.3, category: "MIXED", description: "4 cl Gin, Tonic" }],
     pattern: { weekday: 0.15, weekend: 0.7, drinks: ["Gin Tonic", "Bier 0,5 l", "Schnaps 2 cl", "Weizen 0,5 l"], max: 5 },
+    sport: { chance: 0.3, types: ["Krafttraining/Fitness"], durations: [60, 90] },
   },
   {
     name: "Aylin Demir", email: "aylin@pegel.demo", model: "CUSTOM", factor: 0.6, weight: 70, height: 165, scheme: "LIGHT",
     community: { display: "DISPLAY_NAME" },
     own: [{ name: "Cidre brut", volumeMl: 330, abv: 4.5, category: "CIDER", description: "Normandie" }],
     pattern: { weekday: 0.1, weekend: 0.4, drinks: ["Cidre brut", "Wein 0,2 l", "Sekt"], max: 2 },
+    sport: { chance: 0.35, types: ["Spazieren/Wandern", "Yoga/Pilates"], durations: [30, 60, 120] },
   },
 ];
 
@@ -91,6 +97,7 @@ for (const p of PERSONAS) {
   });
   await api("/api/v1/me/community", { method: "PUT", cookie, body: { optIn: true, ...p.community } });
   for (const b of p.own) await api("/api/v1/beverages", { method: "POST", cookie, body: { ...b, isFavorite: true } });
+  for (const a of p.ownSport ?? []) await api("/api/v1/activity-types", { method: "POST", cookie, body: { ...a, isFavorite: true } });
 
   const { rows: [user] } = await client.query(`SELECT id FROM "user" WHERE email = $1`, [p.email]);
   // Registrierung und Profil zurückdatieren, damit Verlauf und Sparschwein Daten haben
@@ -130,7 +137,26 @@ for (const p of PERSONAS) {
     await insert(bev, servings, localDay(0), time);
     count++;
   }
-  console.log(`${p.name}: ${count} Einträge`);
+  // Sport: an zufälligen Tagen eine Einheit am frühen Abend bzw. am Wochenende vormittags
+  const { rows: acts } = await client.query(`SELECT id, name, icon, "defaultIntensity" FROM activity_type WHERE "ownerId" IS NULL OR "ownerId" = $1`, [user.id]);
+  const actByName = new Map(acts.map((a) => [a.name, a]));
+  let sessions = 0;
+  for (let off = -DAYS + 1; off <= 0 && p.sport; off++) {
+    if (rnd() > p.sport.chance) continue;
+    const day = localDay(off);
+    const dow = new Date(`${day}T12:00:00Z`).getUTCDay();
+    const a = actByName.get(p.sport.types[Math.floor(rnd() * p.sport.types.length)]);
+    const minutes = p.sport.durations[Math.floor(rnd() * p.sport.durations.length)];
+    const intensity = rnd() < 0.2 ? (a.defaultIntensity === "VIGOROUS" ? "MODERATE" : "VIGOROUS") : a.defaultIntensity;
+    const time = off === 0 ? "07:15" : dow === 0 || dow === 6 ? "10:00" : "17:30";
+    await client.query(
+      `INSERT INTO activity_entry (id, "userId", "activityTypeId", "activityName", icon, "durationMin", intensity, "performedAt", timezone, "createdAt", "updatedAt")
+       VALUES (gen_random_uuid()::text, $1, $2, $3, $4, $5, $6, ($7::timestamp AT TIME ZONE $8), $8, now(), now())`,
+      [user.id, a.id, a.name, a.icon, minutes, intensity, `${day} ${time}`, TZ],
+    );
+    sessions++;
+  }
+  console.log(`${p.name}: ${count} Einträge, ${sessions} Sporteinheiten`);
 }
 
 await client.end();

@@ -6,6 +6,10 @@ import { currentEstimate } from "@/server/services/estimate";
 import { recentEntries } from "@/server/services/entries";
 import { userSavings } from "@/server/services/savings";
 import { SavingsCard } from "@/features/savings/savings-card";
+import { weeklyActivity } from "@/server/services/activities";
+import { prisma } from "@/server/db";
+import { ActivityWeekCard } from "@/features/activities/activity-week-card";
+import { SportNotice } from "@/features/activities/sport-notice";
 import { Card, CardHeader, EmptyState, LinkButton, PageHeader, Stat } from "@/components/ui";
 import { DailyLineChart } from "@/components/charts";
 import { EstimateCard } from "@/features/estimate/estimate-card";
@@ -29,7 +33,14 @@ function Trend({ c, label }: { c: Comparison; label: string }) {
 
 export default async function DashboardPage() {
   const user = await requireOnboardedUser();
-  const [summary, estimate, recent, savings] = await Promise.all([dashboardSummary(user), currentEstimate(user), recentEntries(user, 6), userSavings(user)]);
+  const [summary, estimate, recent, savings, week, notice] = await Promise.all([
+    dashboardSummary(user),
+    currentEstimate(user),
+    recentEntries(user, 6),
+    userSavings(user),
+    weeklyActivity(user),
+    prisma.user.findUnique({ where: { id: user.id }, select: { sportNoticeDismissedAt: true } }),
+  ]);
   const hour = zonedParts(new Date(), user.timezone).hour;
   const greeting = hour < 11 ? "Guten Morgen" : hour < 18 ? "Hallo" : "Guten Abend";
 
@@ -44,6 +55,8 @@ export default async function DashboardPage() {
           </LinkButton>
         }
       />
+
+      {notice && !notice.sportNoticeDismissedAt && <SportNotice />}
 
       {!summary.hasAnyEntries ? (
         <Card className="mb-6">
@@ -95,6 +108,7 @@ export default async function DashboardPage() {
         </div>
         <div className="flex flex-col gap-6 lg:col-span-2">
           <SavingsCard savings={savings} />
+          <ActivityWeekCard week={week} />
           <Card>
             <CardHeader
               title="Letzte Einträge"

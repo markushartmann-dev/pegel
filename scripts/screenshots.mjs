@@ -79,6 +79,14 @@ async function shot(page, name, path, { full = false, before } = {}) {
   await shot(page, "12-modell-hinweise", "/hinweise");
   await shot(page, "17-neuigkeiten", "/neuigkeiten");
   await shot(page, "18-admin-vorschlaege", "/admin/vorschlaege");
+  await shot(page, "19-sport-erfassen", "/erfassen?art=sport", {
+    before: async (p) => {
+      await p.getByRole("button", { name: /^Laufen/ }).click();
+      await p.getByRole("radio", { name: "60 Min." }).click();
+    },
+  });
+  await shot(page, "25-sportarten", "/sportarten", { full: true });
+  await shot(page, "26-verlauf-sport", "/verlauf?art=sport");
   await ctx.close();
 }
 
@@ -112,6 +120,16 @@ for (const [email, name, path] of [
   });
   await shot(page, "36-mobil-getraenke", "/getraenke");
   await shot(page, "37-mobil-neuigkeiten", "/neuigkeiten", { before: async (p) => p.mouse.wheel(0, 900) });
+  await shot(page, "38-mobil-sport-erfassen", "/erfassen?art=sport", {
+    before: async (p) => {
+      await p.getByRole("button", { name: /^Schwimmen/ }).click();
+      await p.getByRole("radio", { name: "90 Min." }).click();
+      await p.getByRole("button", { name: "Erfassen", exact: true }).scrollIntoViewIfNeeded();
+    },
+  });
+  await shot(page, "39-mobil-bewegung", "/dashboard", {
+    before: async (p) => p.getByRole("heading", { name: "Bewegung diese Woche" }).scrollIntoViewIfNeeded(),
+  });
   await ctx.close();
 }
 {

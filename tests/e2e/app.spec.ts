@@ -71,6 +71,32 @@ test("4. Dashboard, Kalender, Verlauf und Statistik zeigen die erfassten Daten",
   await expect(page.getByText("Verteilung nach Kategorie")).toBeVisible();
 });
 
+test("Sport erfassen: Sportart, Dauer, Intensität – erscheint in Übersicht, Verlauf und Kalender", async ({ page }) => {
+  await login(page, admin.email);
+  await page.goto("/erfassen");
+  await page.getByRole("link", { name: "Sport", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Sport erfassen" })).toBeVisible();
+  await page.getByRole("button", { name: /^Laufen/ }).click();
+  // Laufen ist standardmäßig intensiv
+  await expect(page.getByRole("radio", { name: "intensiv" })).toHaveAttribute("aria-checked", "true");
+  await page.getByRole("radio", { name: "Andere …" }).click();
+  await page.getByLabel("Minuten").fill("45");
+  await page.getByRole("radio", { name: "mittel" }).click();
+  await page.getByRole("button", { name: "Erfassen", exact: true }).click();
+  await expect(page.getByText("Summe: 45 Min.")).toBeVisible();
+
+  await page.goto("/dashboard");
+  await expect(page.getByRole("heading", { name: "Bewegung diese Woche" })).toBeVisible();
+  await expect(page.getByText("45 / 150 Min.")).toBeVisible();
+  // neue Konten bekommen den Hinweis für Bestandskonten nicht
+  await expect(page.getByText("Neu: Sport-Tracking")).toHaveCount(0);
+
+  await page.goto("/verlauf?art=sport");
+  await expect(page.getByText("1 Einheit · 45 Min. insgesamt")).toBeVisible();
+  await page.goto("/kalender");
+  await expect(page.getByRole("heading", { name: "Sport", exact: true })).toBeVisible();
+});
+
 test("5. Sitzung bleibt nach Browser-Neustart erhalten (nur mit 'Angemeldet bleiben')", async ({ browser }) => {
   // Persistente Anmeldung
   const ctx1 = await browser.newContext();
@@ -218,7 +244,7 @@ test("Neuigkeiten zeigen das Changelog, auch ohne Anmeldung", async ({ browser, 
   const anon = await ctx.newPage();
   await anon.goto("/neuigkeiten");
   await expect(anon.getByRole("heading", { name: /Version 1\.0\.0/ })).toBeVisible();
-  await expect(anon.getByText("aktuell")).toBeVisible();
+  await expect(anon.getByText("aktuell", { exact: true })).toBeVisible();
   await ctx.close();
   await login(page, admin.email);
   await page.getByRole("link", { name: /^Version \d/ }).click();
@@ -239,7 +265,7 @@ test("Sicherheits-Header und kein Caching privater API-Antworten", async ({ page
 test("Auf dem Handy passt jede Seite ohne seitliches Scrollen; Neuigkeiten behalten den Weg zurück", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await login(page, admin.email);
-  for (const path of ["/dashboard", "/getraenke", "/statistik", "/community", "/einstellungen", "/admin", "/admin/protokoll", "/admin/vorschlaege"]) {
+  for (const path of ["/dashboard", "/erfassen?art=sport", "/sportarten", "/verlauf?art=sport", "/getraenke", "/statistik", "/community", "/einstellungen", "/admin", "/admin/protokoll", "/admin/vorschlaege"]) {
     await page.goto(path);
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     expect(overflow, path).toBeLessThanOrEqual(0);

@@ -7,7 +7,7 @@ import { Alert, Button, Field, Textarea } from "@/components/ui";
 import { Dialog, useToast } from "@/components/ui/client";
 import { api, ApiError } from "@/lib/api-client";
 
-export function SuggestionActions({ id, name }: { id: string; name: string }) {
+export function SuggestionActions({ id, name, kind = "beverage" }: { id: string; name: string; kind?: "beverage" | "activity" }) {
   const router = useRouter();
   const toast = useToast();
   const [busy, setBusy] = useState(false);
@@ -19,7 +19,7 @@ export function SuggestionActions({ id, name }: { id: string; name: string }) {
     setBusy(true);
     setError(null);
     try {
-      await api(`/api/v1/admin/suggestions/${id}`, { method: "POST", body });
+      await api(kind === "activity" ? `/api/v1/admin/activity-suggestions/${id}` : `/api/v1/admin/suggestions/${id}`, { method: "POST", body });
       toast(message);
       setRejecting(false);
       router.refresh();
@@ -34,13 +34,13 @@ export function SuggestionActions({ id, name }: { id: string; name: string }) {
 
   return (
     <div className="flex w-full flex-wrap gap-2 sm:w-auto">
-      <Button onClick={() => review({ decision: "approve" }, `„${name}“ ist jetzt ein Standardgetränk.`)} loading={busy && !rejecting}>
+      <Button onClick={() => review({ decision: "approve" }, kind === "activity" ? `„${name}“ ist jetzt eine Standard-Sportart.` : `„${name}“ ist jetzt ein Standardgetränk.`)} loading={busy && !rejecting}>
         <Check className="size-4" aria-hidden /> Freigeben
       </Button>
       <Button variant="outline" onClick={() => setRejecting(true)} disabled={busy}>
         <X className="size-4" aria-hidden /> Ablehnen
       </Button>
-      <Dialog open={rejecting} onClose={() => setRejecting(false)} title={`„${name}“ ablehnen`} description="Die Begründung sieht die Person bei ihrem Getränk.">
+      <Dialog open={rejecting} onClose={() => setRejecting(false)} title={`„${name}“ ablehnen`} description={kind === "activity" ? "Die Begründung sieht die Person bei ihrer Sportart." : "Die Begründung sieht die Person bei ihrem Getränk."}>
         <form
           className="flex flex-col gap-4"
           onSubmit={(e) => {
@@ -48,8 +48,8 @@ export function SuggestionActions({ id, name }: { id: string; name: string }) {
             void review({ decision: "reject", note }, "Vorschlag abgelehnt.");
           }}
         >
-          <Field label="Begründung" htmlFor="reject-note">
-            <Textarea id="reject-note" value={note} onChange={(e) => setNote(e.target.value)} maxLength={300} placeholder="z. B. Alkoholgehalt bitte vom Etikett prüfen" />
+          <Field label="Begründung" htmlFor={`reject-note-${id}`}>
+            <Textarea id={`reject-note-${id}`} value={note} onChange={(e) => setNote(e.target.value)} maxLength={300} placeholder="z. B. Alkoholgehalt bitte vom Etikett prüfen" />
           </Field>
           {error && <Alert tone="danger">{error}</Alert>}
           <div className="flex justify-end gap-2">

@@ -3,6 +3,7 @@ import { auth } from "@/server/auth";
 import { prisma } from "@/server/db";
 import { resetRateLimits } from "@/server/rate-limit";
 import { DEFAULT_BEVERAGES } from "@/lib/default-beverages";
+import { DEFAULT_ACTIVITY_TYPES } from "@/lib/activities";
 import { alcoholGrams, roundGrams } from "@/lib/calculations/alcohol";
 
 export const ORIGIN = "http://localhost:3000";
@@ -98,6 +99,13 @@ export async function resetDb() {
       data: { volumeMl: b.volumeMl, abv: b.abv, alcoholGrams: roundGrams(alcoholGrams(b.volumeMl, b.abv)), isActive: true },
     });
   }
+  // Freigegebene Vorschläge aus früheren Tests entfernen, Standard-Sportarten zurücksetzen
+  await prisma.activityType.deleteMany({ where: { ownerId: null, name: { notIn: DEFAULT_ACTIVITY_TYPES.map((a) => a.name) } } });
+  for (const a of DEFAULT_ACTIVITY_TYPES) {
+    await prisma.activityType.updateMany({ where: { ownerId: null, isDefault: true, name: a.name }, data: { defaultIntensity: a.defaultIntensity, isActive: true } });
+  }
 }
 
 export const beverageId = async (name: string) => (await prisma.beverage.findFirstOrThrow({ where: { name, ownerId: null } })).id;
+
+export const activityTypeId = async (name: string) => (await prisma.activityType.findFirstOrThrow({ where: { name, ownerId: null } })).id;

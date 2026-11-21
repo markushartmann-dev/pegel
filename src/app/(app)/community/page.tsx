@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Flame, PiggyBank, Users } from "lucide-react";
+import { Dumbbell, Flame, PiggyBank, Users } from "lucide-react";
 import { requireOnboardedUser } from "@/server/page-auth";
 import { prisma } from "@/server/db";
 import { communityRanking, COMMUNITY_PERIODS, inactiveHiddenCount, type CommunityPeriod } from "@/server/services/community";
 import { savingsRanking, userSavings } from "@/server/services/savings";
+import { activityRanking } from "@/server/services/activities";
+import { formatDuration } from "@/lib/activities";
 import { SavingsCard } from "@/features/savings/savings-card";
 import { Alert, Badge, Card, CardHeader, EmptyState, PageHeader, SegmentedLinks } from "@/components/ui";
 import { RankingBarChart, ShareDonut } from "@/components/charts";
@@ -19,21 +21,22 @@ export default async function CommunityPage({ searchParams }: { searchParams: Pr
   const user = await requireOnboardedUser();
   const { zeitraum } = await searchParams;
   const period: CommunityPeriod = (COMMUNITY_PERIODS as readonly string[]).includes(zeitraum ?? "") ? (zeitraum as CommunityPeriod) : "week";
-  const [settings, ranking, savingsTop, ownSavings, inactive] = await Promise.all([
+  const [settings, ranking, savingsTop, ownSavings, inactive, movement] = await Promise.all([
     prisma.user.findUniqueOrThrow({ where: { id: user.id }, select: { communityOptIn: true, communityDisplay: true, communityPseudonym: true } }),
     communityRanking(period, user.id),
     savingsRanking(period, user.id),
     userSavings(user),
     inactiveHiddenCount(),
+    activityRanking(period, user.id),
   ]);
   const pie = [...ranking.top.map((r) => ({ name: r.label, value: r.grams })), ...(ranking.rest ? [{ name: `Weitere (${ranking.rest.count})`, value: ranking.rest.grams }] : [])];
 
   return (
     <>
-      <PageHeader title="Community" description="Sparschwein und Vergleich der dokumentierten Mengen zwischen Teilnehmenden dieser App." />
+      <PageHeader title="Community" description="Sparschwein, Bewegung und Vergleich der dokumentierten Mengen zwischen Teilnehmenden dieser App." />
       <Alert tone="info" className="mb-6">
         Die Statistik ist nur für angemeldete Benutzer dieser Installation sichtbar und wird nicht veröffentlicht. Sie zeigt ausschließlich erfasste
-        Mengen – nicht den tatsächlichen Alkoholkonsum. Teilnehmende ohne Einträge im Zeitraum erscheinen nicht; gelöschte Konten und widerrufene
+        Mengen und Sportminuten – nicht den tatsächlichen Alkoholkonsum. Teilnehmende ohne Einträge im Zeitraum erscheinen nicht; gelöschte Konten und widerrufene
         Teilnahmen werden sofort entfernt. Wer seit {inactive.days} Tagen nicht in der App war, wird ausgeblendet und erscheint mit der nächsten
         Anmeldung wieder{inactive.hidden > 0 ? ` (derzeit ${countLabel(inactive.hidden, "Person", "Personen")})` : ""}.
       </Alert>
@@ -85,6 +88,34 @@ export default async function CommunityPage({ searchParams }: { searchParams: Pr
                   />
                 )}
                 <p className="mt-2 text-xs text-fg-muted">Zusammen gespart: {formatEuro(savingsTop.total)}</p>
+              </>
+            )}
+          </Card>
+          <Card>
+            <CardHeader
+              icon={<Dumbbell className="size-5" />}
+              title="Bewegungs-Ranking"
+              description={`${LABELS[period]} · erfasste Sportminuten${movement.totalMinutes > 0 ? ` · zusammen ${formatDuration(movement.totalMinutes)}` : ""}`}
+            />
+            {movement.top.length === 0 ? (
+              <EmptyState icon={<Dumbbell className="size-6" />} title="Noch keine Bewegung erfasst">
+                Sobald Teilnehmende Sport erfassen, erscheint hier das Ranking.
+              </EmptyState>
+            ) : (
+              <>
+                <ol className="mb-4 divide-y divide-border">
+                  {movement.top.map((r) => (
+                    <li key={r.rank} className="flex items-center gap-3 py-2.5">
+                      <span className="w-6 text-right text-sm font-semibold text-fg-muted tabular">{r.rank}.</span>
+                      <span className="min-w-0 flex-1 text-sm break-words">
+                        {r.label} {r.isViewer && <Badge tone="primary">du</Badge>}
+                      </span>
+                      <span className="text-xs tabular text-fg-muted">{countLabel(r.sessions, "Einheit", "Einheiten")}</span>
+                      <span className="w-24 text-right text-sm font-semibold tabular">{formatDuration(r.minutes)}</span>
+                    </li>
+                  ))}
+                </ol>
+                <RankingBarChart unit="min" data={movement.top.map((r) => ({ name: r.label, grams: r.minutes, highlight: r.isViewer }))} height={Math.max(160, movement.top.length * 34)} />
               </>
             )}
           </Card>

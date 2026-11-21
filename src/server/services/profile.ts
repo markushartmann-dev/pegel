@@ -109,6 +109,8 @@ export async function completeOnboarding(userId: string, raw: unknown, headers?:
       data: {
         onboardingCompleted: true,
         profileUpdatedAt: new Date(),
+        // Neue Konten willigen bereits in die um Sportdaten erweiterten Texte ein – kein Hinweis nötig
+        sportNoticeDismissedAt: new Date(),
         timezone: input.timezone,
         ...(input.themeMode ? { themeMode: input.themeMode } : {}),
         ...(input.colorScheme ? { colorScheme: input.colorScheme } : {}),

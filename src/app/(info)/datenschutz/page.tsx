@@ -22,6 +22,7 @@ export default function PrivacyPage() {
         <li>Kontodaten: E-Mail-Adresse, Anzeigename, Passwort (nur als scrypt-Hash), Rolle, Kontostatus</li>
         <li>Profildaten: Gewicht, Größe, Berechnungsprofil, optional Geschlecht, Zeitzone; Historie der Profiländerungen</li>
         <li>Konsumdaten: erfasste Getränke mit Menge, Alkoholgehalt, Zeitpunkt und optionaler Notiz</li>
+        <li>Sportdaten: erfasste Sporteinheiten mit Sportart, Dauer, Intensität, Zeitpunkt und optionaler Notiz sowie eigene Sportarten</li>
         <li>Nutzungs- und Sicherheitsdaten: Login-, Logout- und Aktivitätszeitpunkte, Sitzungen (Gerätekennung des Browsers, IP-Adresse), Aktivitätsprotokoll mit gekürzter IP-Adresse</li>
         <li>Optional: Push-Abonnement (Endpunkt des Push-Dienstes des Browsers), Community-Teilnahme und Pseudonym</li>
       </ul>
@@ -30,7 +31,7 @@ export default function PrivacyPage() {
       <ul>
         <li>Bereitstellung des Kontos und der Funktionen – Art. 6 Abs. 1 lit. b DSGVO</li>
         <li>
-          Konsum- und Körperdaten können Gesundheitsdaten sein – Verarbeitung auf Grundlage der ausdrücklichen Einwilligung, Art. 9 Abs. 2 lit. a
+          Konsum-, Sport- und Körperdaten können Gesundheitsdaten sein – Verarbeitung auf Grundlage der ausdrücklichen Einwilligung, Art. 9 Abs. 2 lit. a
           DSGVO (wird bei der Einrichtung eingeholt und protokolliert)
         </li>
         <li>Community-Ranking und Push-Benachrichtigungen – Einwilligung, Art. 6 Abs. 1 lit. a DSGVO; jederzeit widerrufbar</li>
@@ -40,8 +41,8 @@ export default function PrivacyPage() {
       <h2>4. Wer Zugriff hat</h2>
       <p>
         Deine Einträge sind nur für dich sichtbar. Administratoren sehen Kontodaten, Aktivitätszeitpunkte und aggregierte Zahlen (z. B. Anzahl der
-        Einträge), aber keine einzelnen Konsumeinträge. Die Teilnahme am Community-Ranking ist voreingestellt; du kannst sie bei der Einrichtung und
-        jederzeit unter „Community“ abwählen. Angezeigt wird ausschließlich deine Gesamtmenge unter deinem Anzeigenamen oder einem Pseudonym,
+        Einträge), aber keine einzelnen Konsum- oder Sporteinträge. Die Teilnahme am Community-Ranking ist voreingestellt; du kannst sie bei der Einrichtung und
+        jederzeit unter „Community“ abwählen. Angezeigt werden ausschließlich deine Gesamtmenge und deine Sportminuten (Summe und Anzahl der Einheiten) unter deinem Anzeigenamen oder einem Pseudonym,
         und nur für angemeldete Benutzer dieser Installation. Warst du {env.communityInactiveDays} Tage nicht in der App, wirst du ausgeblendet, bis du dich wieder anmeldest.
       </p>
 
@@ -55,7 +56,7 @@ export default function PrivacyPage() {
 
       <h2>6. Speicherdauer (Vorschlag, zu prüfen)</h2>
       <ul>
-        <li>Konto-, Profil- und Konsumdaten: bis zur Löschung des Kontos</li>
+        <li>Konto-, Profil-, Konsum- und Sportdaten: bis zur Löschung des Kontos</li>
         <li>Sitzungen: bis zum Ablauf oder Logout</li>
         <li>Aktivitätsprotokoll: wird bei Kontolöschung pseudonymisiert; Betreiber sollte eine Frist festlegen (z. B. 12 Monate)</li>
         <li>Backups: gemäß Backup-Konzept des Betreibers (gelöschte Daten können bis zum Ablauf der Backup-Rotation in Sicherungen enthalten sein)</li>

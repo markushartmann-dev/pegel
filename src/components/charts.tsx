@@ -20,6 +20,7 @@ import {
 } from "recharts";
 import { formatDayKey } from "@/lib/dates";
 import { formatEuro, formatNumber } from "@/i18n";
+import { formatDuration } from "@/lib/activities";
 
 export const CHART_COLORS = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)", "var(--chart-4)", "var(--chart-5)"];
 
@@ -168,17 +169,17 @@ export function RankingBarChart({
 }: {
   data: { name: string; grams: number; highlight?: boolean }[];
   height?: number;
-  unit?: "g" | "eur";
+  unit?: "g" | "eur" | "min";
 }) {
-  const fmt = (v: unknown) => (unit === "eur" ? formatEuro(Number(v)) : g(v));
+  const fmt = (v: unknown) => (unit === "eur" ? formatEuro(Number(v)) : unit === "min" ? formatDuration(Number(v)) : g(v));
   return (
-    <div style={{ height }} role="img" aria-label={unit === "eur" ? "Balkendiagramm: Sparschwein je Teilnehmer" : "Balkendiagramm: Gesamtmenge je Teilnehmer"}>
+    <div style={{ height }} role="img" aria-label={unit === "eur" ? "Balkendiagramm: Sparschwein je Teilnehmer" : unit === "min" ? "Balkendiagramm: Bewegungsminuten je Teilnehmer" : "Balkendiagramm: Gesamtmenge je Teilnehmer"}>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} layout="vertical" margin={{ top: 0, right: 16, bottom: 0, left: 8 }}>
           <CartesianGrid strokeDasharray="3 3" horizontal={false} />
           <XAxis type="number" tickLine={false} axisLine={false} allowDecimals={false} />
           <YAxis type="category" dataKey="name" width={100} tickLine={false} axisLine={false} />
-          <Tooltip {...tooltipStyle} formatter={(v) => [fmt(v), unit === "eur" ? "Gespart" : "Gesamt"]} />
+          <Tooltip {...tooltipStyle} formatter={(v) => [fmt(v), unit === "eur" ? "Gespart" : unit === "min" ? "Bewegung" : "Gesamt"]} />
           <Bar isAnimationActive={false} dataKey="grams" radius={[0, 6, 6, 0]} maxBarSize={22}>
             {data.map((d) => (
               <Cell key={d.name} fill={d.highlight ? "var(--chart-2)" : "var(--chart-1)"} />

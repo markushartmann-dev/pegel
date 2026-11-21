@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, PlusCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Dumbbell, PlusCircle } from "lucide-react";
 import { requireOnboardedUser } from "@/server/page-auth";
 import { monthOverview } from "@/server/services/statistics";
 import { entriesForDay } from "@/server/services/entries";
 import { dayCurve } from "@/server/services/estimate";
+import { activitiesForDay, monthActivity } from "@/server/services/activities";
+import { ActivityList } from "@/features/activities/activity-list";
+import { formatDuration } from "@/lib/activities";
 import { Card, CardHeader, LinkButton, PageHeader, SegmentedLinks, cn } from "@/components/ui";
 import { EntryList } from "@/features/consumption/entry-list";
 import { EstimateChart } from "@/components/charts";
@@ -39,7 +42,13 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
   const month = sp.monat && /^\d{4}-(0[1-9]|1[0-2])$/.test(sp.monat) ? sp.monat : selected.slice(0, 7);
   const view = sp.ansicht === "woche" ? "woche" : "monat";
 
-  const [overview, dayEntries, curve] = await Promise.all([monthOverview(user, month), entriesForDay(user, selected), dayCurve(user, selected)]);
+  const [overview, dayEntries, curve, sport, dayActivities] = await Promise.all([
+    monthOverview(user, month),
+    entriesForDay(user, selected),
+    dayCurve(user, selected),
+    monthActivity(user, month),
+    activitiesForDay(user, selected),
+  ]);
   const href = (m: string, d?: string, v = view) => `/kalender?monat=${m}${d ? `&tag=${d}` : ""}${v === "woche" ? "&ansicht=woche" : ""}`;
   const firstDay = `${month}-01`;
   const leading = (new Date(`${firstDay}T12:00:00Z`).getUTCDay() + 6) % 7;
@@ -48,7 +57,9 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
   const weekStart = startOfIsoWeek(selected);
   const weekDays = daysBetween(weekStart, addDays(weekStart, 6));
   const otherMonth = weekDays.find((d) => d.slice(0, 7) !== month)?.slice(0, 7);
-  const otherOverview = view === "woche" && otherMonth ? await monthOverview(user, otherMonth) : null;
+  const [otherOverview, otherSport] = view === "woche" && otherMonth ? await Promise.all([monthOverview(user, otherMonth), monthActivity(user, otherMonth)]) : [null, null];
+  const sportDays: Record<string, { minutes: number; sessions: number }> = { ...sport.days, ...(otherSport?.days ?? {}) };
+  const dayMinutes = dayActivities.reduce((a, e) => a + e.durationMin, 0);
   const weekMap = new Map([...overview.days, ...(otherOverview?.days ?? [])].map((d) => [d.day, d]));
   const daySum = dayEntries.reduce((a, e) => a + e.alcoholGrams, 0);
 
@@ -56,7 +67,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
     <>
       <PageHeader
         title="Kalender"
-        description="Tage mit erfassten Getränken sind farbig markiert. Tag antippen für Details."
+        description="Tage mit erfassten Getränken sind farbig markiert, Sporttage mit einem Symbol. Tag antippen für Details."
         actions={
           <SegmentedLinks
             label="Ansicht"
@@ -112,19 +123,21 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
                   const lv = level(d.grams);
                   const isSel = d.day === selected;
                   const isToday = d.day === today;
+                  const sp = sportDays[d.day];
                   return (
                     <li key={d.day}>
                       <Link
                         href={href(month, d.day)}
                         aria-current={isSel ? "date" : undefined}
-                        aria-label={`${formatDayKey(d.day, "long")}: ${d.drinks ? `${d.drinks} Einträge, ${formatGrams(d.grams)}` : "keine Einträge"}`}
+                        aria-label={`${formatDayKey(d.day, "long")}: ${d.drinks ? `${d.drinks} Einträge, ${formatGrams(d.grams)}` : "keine Einträge"}${sp ? `, Sport ${formatDuration(sp.minutes)}` : ""}`}
                         className={cn(
-                          "flex aspect-square min-h-11 flex-col items-center justify-center rounded-[var(--radius-sm)] border text-sm transition-colors sm:aspect-[4/3]",
+                          "relative flex aspect-square min-h-11 flex-col items-center justify-center rounded-[var(--radius-sm)] border text-sm transition-colors sm:aspect-[4/3]",
                           levelClass[lv],
                           isSel ? "border-primary ring-2 ring-primary/40" : "border-transparent hover:border-border",
                           d.day > today && "text-fg-muted/60",
                         )}
                       >
+                        {sp && <Dumbbell className="absolute right-1 top-1 size-3 text-success" aria-hidden />}
                         <span className={cn("tabular", isToday && "font-bold text-primary")}>{Number(d.day.slice(8))}</span>
                         {d.drinks > 0 && <span className="hidden text-[10px] leading-none text-fg-muted tabular sm:block">{formatNumber(d.grams, 0)} g</span>}
                         {d.drinks > 0 && <span className="mt-0.5 size-1.5 rounded-full bg-primary sm:hidden" aria-hidden />}
@@ -136,6 +149,13 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
               <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-fg-muted">
                 <span>
                   Monat: <strong className="text-fg tabular">{formatGrams(overview.totals.grams)}</strong> · {countLabel(overview.totals.activeDays, "Tag", "Tage")} mit Einträgen
+                  {sport.sessions > 0 && (
+                    <>
+                      {" "}
+                      · <Dumbbell className="inline size-3 text-success" aria-hidden /> <strong className="text-fg tabular">{formatDuration(sport.minutes)}</strong> Sport an{" "}
+                      {countLabel(sport.activeDays, "Tag", "Tagen")}
+                    </>
+                  )}
                 </span>
                 <span className="flex items-center gap-1" aria-hidden>
                   weniger
@@ -154,7 +174,14 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
                   <li key={d}>
                     <Link href={href(d.slice(0, 7), d, "woche")} aria-current={d === selected ? "date" : undefined} className={cn("flex items-center justify-between gap-3 rounded-md px-2 py-3 hover:bg-muted", d === selected && "bg-muted")}>
                       <span className={cn("text-sm", d === today && "font-semibold text-primary")}>{formatDayKey(d, "long")}</span>
-                      <span className="text-sm tabular text-fg-muted">{s && s.drinks ? `${s.drinks} × · ${formatGrams(s.grams)}` : "–"}</span>
+                      <span className="flex flex-wrap items-center justify-end gap-x-3 text-sm tabular text-fg-muted">
+                        {sportDays[d] && (
+                          <span className="inline-flex items-center gap-1 text-success">
+                            <Dumbbell className="size-3.5" aria-hidden /> {formatDuration(sportDays[d].minutes)}
+                          </span>
+                        )}
+                        <span>{s && s.drinks ? `${s.drinks} × · ${formatGrams(s.grams)}` : "–"}</span>
+                      </span>
                     </Link>
                   </li>
                 );
@@ -178,6 +205,23 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
             />
             {dayEntries.length ? <EntryList entries={dayEntries} timezone={user.timezone} showDate={false} /> : <p className="text-sm text-fg-muted">An diesem Tag wurde nichts erfasst.</p>}
           </Card>
+          {(dayActivities.length > 0 || selected <= today) && (
+            <Card>
+              <CardHeader
+                icon={<Dumbbell className="size-5" />}
+                title="Sport"
+                description={dayActivities.length ? `${countLabel(dayActivities.length, "Einheit", "Einheiten")} · ${formatDuration(dayMinutes)}` : "Keine Einheiten"}
+                action={
+                  selected <= today ? (
+                    <LinkButton href={`/erfassen?art=sport&tag=${selected}`} size="sm" variant="outline">
+                      <PlusCircle className="size-4" aria-hidden /> Nachtragen
+                    </LinkButton>
+                  ) : undefined
+                }
+              />
+              {dayActivities.length > 0 && <ActivityList entries={dayActivities} timezone={user.timezone} showDate={false} />}
+            </Card>
+          )}
           {curve.status === "ok" && (
             <Card>
               <CardHeader title="Modellverlauf an diesem Tag" description={`Höchster Modellwert ca. ${formatPromille(curve.peak)} · mit dem damals gültigen Profil`} />

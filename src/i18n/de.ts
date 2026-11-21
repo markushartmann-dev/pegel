@@ -12,6 +12,7 @@ export const de = {
     dashboard: "Übersicht",
     log: "Erfassen",
     beverages: "Getränke",
+    activities: "Sportarten",
     calendar: "Kalender",
     history: "Verlauf",
     statistics: "Statistik",

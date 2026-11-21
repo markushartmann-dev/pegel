@@ -56,6 +56,8 @@ export async function exportAccount(user: CurrentUser, headers?: Headers) {
       profileRevisions: { orderBy: { validFrom: "asc" } },
       beverages: true,
       entries: { orderBy: { consumedAt: "asc" } },
+      activityTypes: true,
+      activityEntries: { orderBy: { performedAt: "asc" } },
       consents: { orderBy: { createdAt: "asc" } },
       sessions: { select: { createdAt: true, updatedAt: true, expiresAt: true, userAgent: true } },
       pushSubscriptions: { select: { createdAt: true, userAgent: true, lastUsedAt: true } },
@@ -68,7 +70,7 @@ export async function exportAccount(user: CurrentUser, headers?: Headers) {
 }
 
 /**
- * Löscht das eigene Konto inkl. Profil, Getränken, Einträgen, Sitzungen und Push-Abos (Cascade).
+ * Löscht das eigene Konto inkl. Profil, Getränken, Einträgen, Sportarten und -einheiten, Sitzungen und Push-Abos (Cascade).
  * Protokolleinträge bleiben ohne Personenbezug erhalten (actorId/targetUserId → NULL).
  */
 export async function deleteOwnAccount(user: CurrentUser, raw: unknown, headers?: Headers) {
